@@ -748,29 +748,21 @@ BEGIN
         source_table        VARCHAR(100)
     ) ON COMMIT DROP;
 
-    /* =========================
-       ONLINE NOT USED → SAME (kept offline only)
-       burayı aynı bıraktım
-       ========================= */
-
     INSERT INTO tmp_employee_map_source
     SELECT DISTINCT
-        src.employee_name || '-' || src.employee_hire_date AS employee_src_id,   --  (clean staging → no re-clean)
+        src.employee_name || '-' || src.employee_hire_date AS employee_src_id,   
         src.employee_name,
         src.employee_position,
         src.employee_salary,
         src.employee_hire_date,
-        COALESCE(src.transaction_dt, TIMESTAMP '1900-01-01') AS observed_ts,  -- burayı değiştirdim (clean column + null safe)
+        COALESCE(src.transaction_dt, TIMESTAMP '1900-01-01') AS observed_ts, 
         'sl_offline_retail' AS source_system,
         'src_offline_retail' AS source_table
     FROM sl_offline_retail.src_offline_retail src
     WHERE COALESCE(src.employee_name, 'n.a.') IS NOT NULL;
 
-    /* =========================
-       INCREMENTAL SOURCE (optional)
-       burayı aynı bıraktım (logic correct)
-       ========================= */
-
+       -- INCREMENTAL SOURCE (optional)
+       
     IF to_regclass('sl_offline_retail.src_offline_retail_employee_inc') IS NOT NULL THEN
 
         INSERT INTO tmp_employee_map_source
@@ -790,10 +782,7 @@ BEGIN
 
     END IF;
 
-    /* =========================
-       FINAL INSERT (SCD2 READY)
-       burayı büyük ölçüde aynı bıraktım
-       ========================= */
+-- FINAL INSERT (SCD2 READY)
 
     INSERT INTO stg.mapping_employees (
         employee_src_id,
