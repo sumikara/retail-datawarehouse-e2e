@@ -1,3 +1,5 @@
+CREATE DATABASE retail_dw;
+
 -- Extensions
 CREATE EXTENSION IF NOT EXISTS file_fdw;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
