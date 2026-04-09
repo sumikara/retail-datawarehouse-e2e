@@ -13,8 +13,8 @@ BEGIN
 END $$;
 
 -- Schemas
-CREATE SCHEMA IF NOT EXISTS sl_online_retail; -- sl:source layer
+CREATE SCHEMA IF NOT EXISTS sl_online_retail; 
 CREATE SCHEMA IF NOT EXISTS sl_offline_retail;
-CREATE SCHEMA IF NOT EXISTS stg; -- staging
+CREATE SCHEMA IF NOT EXISTS stg;
 CREATE SCHEMA IF NOT EXISTS 3nf; -- normalized, Immon
 CREATE SCHEMA IF NOT EXISTS dim; -- denormalized, Kimball
