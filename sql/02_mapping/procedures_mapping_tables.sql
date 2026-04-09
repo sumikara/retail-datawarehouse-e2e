@@ -853,8 +853,324 @@ WHEN OTHERS THEN
                   || ' | HINT='   || COALESCE(v_err_hint, 'n.a.'),
         'ERROR'
     );
-
     RAISE;
-
 END;
 $$;
+
+-- transactions
+CREATE OR REPLACE PROCEDURE stg.load_map_transactions()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_proc        TEXT := 'stg.load_map_transactions';
+    v_ins         INT  := 0;
+    v_err_msg     TEXT;
+    v_err_detail  TEXT;
+    v_err_hint    TEXT;
+BEGIN
+    WITH unioned_sources AS (
+        SELECT
+            COALESCE(NULLIF(src.transaction_id,''),'n.a.')                AS transaction_id,
+            src.transaction_dt,
+            src.total_sales,
+            COALESCE(src.payment_method,'n.a.')                           AS payment_method,
+            src.quantity,
+            src.unit_price,
+            src.discount_applied,
+            COALESCE(src.day_of_week,'n.a.')                              AS day_of_week,
+            COALESCE(src.week_of_year, -1)                                AS week_of_year,
+            COALESCE(src.month_of_year, -1)                               AS month_of_year,
+            /* raw ids */
+            COALESCE(NULLIF(src.customer_id,''),'n.a.')                   AS customer_id,
+            COALESCE(NULLIF(src.product_id,''),'n.a.')                    AS product_id,
+            COALESCE(NULLIF(src.promotion_id,''),'n.a.')                  AS promotion_id,
+            COALESCE(NULLIF(src.delivery_id,''),'n.a.')                   AS delivery_id,
+            COALESCE(NULLIF(src.engagement_id,''),'n.a.')                 AS engagement_id,
+            /* employee not present in online */
+            'n.a.'                                                        AS employee_name,
+            DATE '1900-01-01'                                             AS employee_hire_date,
+            COALESCE(src.customer_city,'n.a.')                            AS customer_city,
+            COALESCE(src.customer_state,'n.a.')                           AS customer_state,
+            'n.a.'                                                        AS store_zip_code,
+            'n.a.'                                                        AS store_city,
+            'n.a.'                                                        AS store_state,
+            'n.a.'                                                        AS store_location,
+            /* derived customer src id */
+            COALESCE(src.gender,'n.a.') || '-' ||
+            COALESCE(src.marital_status,'n.a.') || '-' ||
+            COALESCE(src.birth_of_dt::TEXT,'n.a.') || '-' ||
+            COALESCE(src.membership_dt::TEXT,'n.a.') || '-' ||
+            COALESCE(src.customer_zip_code,'n.a.') || '-' ||
+            COALESCE(src.customer_city,'n.a.') || '-' ||
+            COALESCE(src.customer_state,'n.a.')                           AS customer_src_id,
+            COALESCE(NULLIF(src.product_id, ''), 'n.a.')                  AS product_src_id,
+            COALESCE(NULLIF(src.promotion_id, ''), 'n.a.')                AS promotion_src_id,
+            /* online has no store */
+            'n.a.'                                                        AS store_src_id,
+            /* city: customer geography */
+            COALESCE(src.customer_city,'n.a.') || '-' ||
+            COALESCE(src.customer_state,'n.a.')                           AS city_src_id,
+            /* online has no employee */
+            'n.a.'                                                        AS employee_src_id,
+            md5(
+                concat_ws(
+                    '|',
+                    'sl_online_retail',
+                    COALESCE(NULLIF(src.transaction_id,''),'n.a.'),
+                    COALESCE(src.transaction_dt::TEXT,'1900-01-01 00:00:00'),
+                    COALESCE(NULLIF(src.customer_id,''),'n.a.'),
+                    COALESCE(NULLIF(src.product_id,''),'n.a.')
+                )
+            )                                                             AS row_sig,
+            'sl_online_retail'                                            AS source_system,
+            'src_online_retail'                                           AS source_table
+        FROM sl_online_retail.src_online_retail src
+        WHERE COALESCE(NULLIF(src.transaction_id,''),'n.a.') <> 'n.a.'
+          AND src.transaction_dt IS NOT NULL
+        UNION ALL
+        /* =========================================================
+           OFFLINE
+           ========================================================= */
+        SELECT
+            COALESCE(NULLIF(src.transaction_id,''),'n.a.')                AS transaction_id,
+            src.transaction_dt,
+            src.total_sales,
+            COALESCE(src.payment_method,'n.a.')                           AS payment_method,
+            src.quantity,
+            src.unit_price,
+            src.discount_applied,
+            COALESCE(src.day_of_week,'n.a.')                              AS day_of_week,
+            COALESCE(src.week_of_year, -1)                                AS week_of_year,
+            COALESCE(src.month_of_year, -1)                               AS month_of_year,
+            /* raw ids */
+            COALESCE(NULLIF(src.customer_id,''),'n.a.')                   AS customer_id,
+            COALESCE(NULLIF(src.product_id,''),'n.a.')                    AS product_id,
+            COALESCE(NULLIF(src.promotion_id,''),'n.a.')                  AS promotion_id,
+            COALESCE(NULLIF(src.delivery_id,''),'n.a.')                   AS delivery_id,
+            'n.a.'                                                        AS engagement_id,
+            COALESCE(src.employee_name,'n.a.')                            AS employee_name,
+            COALESCE(src.employee_hire_date, DATE '1900-01-01')           AS employee_hire_date,
+            COALESCE(src.customer_city,'n.a.')                            AS customer_city,
+            COALESCE(src.customer_state,'n.a.')                           AS customer_state,
+            COALESCE(src.store_zip_code,'n.a.')                           AS store_zip_code,
+            COALESCE(src.store_city,'n.a.')                               AS store_city,
+            COALESCE(src.store_state,'n.a.')                              AS store_state,
+            COALESCE(src.store_location,'n.a.')                           AS store_location,
+            /* derived customer src id */
+            COALESCE(src.gender,'n.a.') || '-' ||
+            COALESCE(src.marital_status,'n.a.') || '-' ||
+            COALESCE(src.birth_of_dt::TEXT,'n.a.') || '-' ||
+            COALESCE(src.membership_dt::TEXT,'n.a.') || '-' ||
+            COALESCE(src.customer_zip_code,'n.a.') || '-' ||
+            COALESCE(src.customer_city,'n.a.') || '-' ||
+            COALESCE(src.customer_state,'n.a.')                           AS customer_src_id,
+            COALESCE(NULLIF(src.product_id, ''), 'n.a.')                  AS product_src_id,
+            COALESCE(NULLIF(src.promotion_id, ''), 'n.a.')                AS promotion_src_id,
+            /* derived store src id */
+            CASE
+                WHEN COALESCE(src.store_location,'n.a.') <> 'n.a.'
+                THEN COALESCE(src.store_location,'n.a.') || '-' ||
+                     COALESCE(src.store_city,'n.a.') || '-' ||
+                     COALESCE(src.store_state,'n.a.')
+                ELSE 'n.a.'
+            END                                                           AS store_src_id,
+            /* city prefers store geography if store exists */
+            CASE
+                WHEN COALESCE(src.store_city,'n.a.') <> 'n.a.'
+                 AND COALESCE(src.store_state,'n.a.') <> 'n.a.'
+                THEN COALESCE(src.store_city,'n.a.') || '-' ||
+                     COALESCE(src.store_state,'n.a.')
+                ELSE COALESCE(src.customer_city,'n.a.') || '-' ||
+                     COALESCE(src.customer_state,'n.a.')
+            END                                                           AS city_src_id,
+            /* derived employee src id */
+            CASE
+                WHEN COALESCE(src.employee_name,'n.a.') <> 'n.a.'
+                THEN COALESCE(src.employee_name,'n.a.') || '-' ||
+                     COALESCE(src.employee_hire_date::TEXT, '1900-01-01')
+                ELSE 'n.a.'
+            END                                                           AS employee_src_id,
+            md5(
+                concat_ws(
+                    '|',
+                    'sl_offline_retail',
+                    COALESCE(NULLIF(src.transaction_id,''),'n.a.'),
+                    COALESCE(src.transaction_dt::TEXT,'1900-01-01 00:00:00'),
+                    COALESCE(NULLIF(src.customer_id,''),'n.a.'),
+                    COALESCE(NULLIF(src.product_id,''),'n.a.')
+                )
+            )                                                             AS row_sig,
+            'sl_offline_retail'                                           AS source_system,
+            'src_offline_retail'                                          AS source_table
+
+        FROM sl_offline_retail.src_offline_retail src
+        WHERE COALESCE(NULLIF(src.transaction_id,''),'n.a.') <> 'n.a.'
+          AND src.transaction_dt IS NOT NULL
+    ),
+
+    distinct_source AS (
+        SELECT DISTINCT ON (row_sig)
+            transaction_id,
+            transaction_dt,
+            total_sales,
+            payment_method,
+            quantity,
+            unit_price,
+            discount_applied,
+            day_of_week,
+            week_of_year,
+            month_of_year,
+            customer_id,
+            product_id,
+            promotion_id,
+            delivery_id,
+            engagement_id,
+            employee_name,
+            employee_hire_date,
+            customer_city,
+            customer_state,
+            store_zip_code,
+            store_city,
+            store_state,
+            store_location,
+            customer_src_id,
+            product_src_id,
+            promotion_src_id,
+            store_src_id,
+            city_src_id,
+            employee_src_id,
+            row_sig,
+            source_system,
+            source_table
+        FROM unioned_sources
+        ORDER BY
+            row_sig,
+            transaction_dt DESC,
+            customer_src_id DESC,
+            product_src_id DESC,
+            promotion_src_id DESC,
+            source_system
+    )
+
+    INSERT INTO stg.mapping_transactions (
+        transaction_id,
+        transaction_dt,
+        total_sales,
+        payment_method,
+        quantity,
+        unit_price,
+        discount_applied,
+        day_of_week,
+        week_of_year,
+        month_of_year,
+        customer_id,
+        product_id,
+        promotion_id,
+        delivery_id,
+        engagement_id,
+        employee_name,
+        employee_hire_date,
+        customer_city,
+        customer_state,
+        store_zip_code,
+        store_city,
+        store_state,
+        store_location,
+        customer_src_id,
+        product_src_id,
+        promotion_src_id,
+        store_src_id,
+        city_src_id,
+        employee_src_id,
+        row_sig,
+        source_system,
+        source_table
+    )
+    SELECT
+        s.transaction_id,
+        s.transaction_dt,
+        s.total_sales,
+        s.payment_method,
+        s.quantity,
+        s.unit_price,
+        s.discount_applied,
+        s.day_of_week,
+        s.week_of_year,
+        s.month_of_year,
+        s.customer_id,
+        s.product_id,
+        s.promotion_id,
+        s.delivery_id,
+        s.engagement_id,
+        s.employee_name,
+        s.employee_hire_date,
+        s.customer_city,
+        s.customer_state,
+        s.store_zip_code,
+        s.store_city,
+        s.store_state,
+        s.store_location,
+        s.customer_src_id,
+        s.product_src_id,
+        s.promotion_src_id,
+        s.store_src_id,
+        s.city_src_id,
+        s.employee_src_id,
+        s.row_sig,
+        s.source_system,
+        s.source_table
+    FROM distinct_source s
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM stg.mapping_transactions tgt
+        WHERE tgt.row_sig = s.row_sig
+    );
+
+    GET DIAGNOSTICS v_ins = ROW_COUNT;
+
+    PERFORM stg.log_etl_event(
+        v_proc,
+        'stg.mapping_transactions',
+        v_ins,
+        CASE WHEN v_ins > 0 THEN 'SUCCESS' ELSE 'NO_CHANGE' END,
+        'Inserted=' || v_ins || '. Loaded transaction-line rows directly from clean staging and derived src keys inside the same procedure.',
+        NULL,
+        'INFO',
+        v_ins,
+        0,
+        0,
+        0,
+        NULL
+    );
+
+    RAISE NOTICE 't_map_transactions completed. inserted=%', v_ins;
+
+EXCEPTION
+WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS
+        v_err_detail = PG_EXCEPTION_DETAIL,
+        v_err_hint   = PG_EXCEPTION_HINT;
+
+    v_err_msg := SQLERRM;
+
+    PERFORM stg.log_etl_event(
+        v_proc,
+        'stg.mapping_transactions',
+        0,
+        'FAILED',
+        'Transaction map load failed',
+        v_err_msg || ' | DETAIL=' || COALESCE(v_err_detail, 'n.a.')
+                  || ' | HINT='   || COALESCE(v_err_hint, 'n.a.'),
+        'ERROR',
+        0,
+        0,
+        0,
+        0,
+        NULL
+    );
+
+    RAISE;
+END;
+$$;
+
+
