@@ -99,8 +99,6 @@ WHERE NOT EXISTS (
 );
 
 -- products
-
-
 INSERT INTO 3nf.nf_products (
     product_id,
     product_src_id,
@@ -306,57 +304,3 @@ WHERE NOT EXISTS (
     WHERE employee_id = -1
       AND start_dt = TIMESTAMP '1900-01-01 00:00:00'
 );
-
-
---transactions
-INSERT INTO 3nf.nf_transactions (
-    transaction_id,
-    transaction_dt,
-    total_sales,
-    payment_method,
-    quantity,
-    unit_price,
-    discount_applied,
-    day_of_week,
-    week_of_year,
-    month_of_year,
-    store_id,
-    customer_id,
-    promotion_id,
-    delivery_id,
-    product_id,
-    engagement_id,
-    city_id,
-    employee_id,
-    row_sig,
-    source_system,
-    source_table
-)
-SELECT
-    'n.a.',
-    TIMESTAMP '1900-01-01 00:00:00',
-    0,
-    'n.a.',
-    0,
-    0,
-    0,
-    'n.a.',
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    -1,
-    'n.a.',
-    'MANUAL',
-    'MANUAL'
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM 3nf.nf_transactions
-    WHERE row_sig = 'n.a.'
-);
-
