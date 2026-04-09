@@ -5,6 +5,10 @@ CREATE SEQUENCE IF NOT EXISTS dim.seq_dim_promotion_id START 1;
 CREATE SEQUENCE IF NOT EXISTS dim.seq_dim_delivery_id START 1;
 CREATE SEQUENCE IF NOT EXISTS dim.seq_dim_engagement_id START 1;
 CREATE SEQUENCE IF NOT EXISTS dim.seq_dim_employee_id START 1;
+--date
+
+
+
 
 --customers
 CREATE TABLE IF NOT EXISTS dim.dim_customers (
@@ -124,6 +128,25 @@ CREATE TABLE IF NOT EXISTS dim.dim_employees_scd (
     update_dt          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS dim.dim_dates (
+    date_surr_id        BIGINT PRIMARY KEY,      -- yyyymmdd
+    full_date           DATE NOT NULL UNIQUE,
+    day_of_month        INTEGER NOT NULL,
+    month_of_year       INTEGER NOT NULL,
+    year_of_date        INTEGER NOT NULL,
+    quarter_of_year     INTEGER NOT NULL,
+    week_of_year        INTEGER NOT NULL,
+    day_name            VARCHAR(20) NOT NULL,
+    month_name          VARCHAR(20) NOT NULL,
+    is_weekend          BOOLEAN NOT NULL,
+    is_month_start      BOOLEAN NOT NULL,
+    is_month_end        BOOLEAN NOT NULL,
+    is_quarter_start    BOOLEAN NOT NULL,
+    is_quarter_end      BOOLEAN NOT NULL,
+    is_year_start       BOOLEAN NOT NULL,
+    is_year_end         BOOLEAN NOT NULL,
+    insert_dt           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_dim_customers_src_id
     ON dim.dim_customers (customer_src_id);
@@ -203,3 +226,18 @@ ON dim.dim_employees_scd (employee_src_id, start_dt);
 
 CREATE INDEX IF NOT EXISTS ix_dm_emp_scd_lookup
 ON dim.dim_employees_scd (employee_src_id, start_dt, end_dt);
+
+CREATE INDEX IF NOT EXISTS ix_dim_dates_full_date
+    ON dim.dim_dates (full_date);
+
+CREATE INDEX IF NOT EXISTS ix_dim_dates_year_month
+    ON dim.dim_dates (year_of_date, month_of_year);
+
+CREATE INDEX IF NOT EXISTS ix_dim_dates_year_week
+    ON dim.dim_dates (year_of_date, week_of_year);
+
+CREATE INDEX IF NOT EXISTS ix_dim_dates_month_name
+    ON dim.dim_dates (month_name);
+
+CREATE INDEX IF NOT EXISTS ix_dim_dates_day_name
+    ON dim.dim_dates (day_name);
