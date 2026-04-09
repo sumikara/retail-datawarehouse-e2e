@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS bl_dm.fct_transactions (
+CREATE TABLE IF NOT EXISTS dim.fct_transactions_dd_dd (
     transaction_src_id   VARCHAR(100) NOT NULL,
     total_sales          NUMERIC(10,2) NOT NULL DEFAULT 0,
     quantity             INTEGER      NOT NULL DEFAULT 0,
@@ -13,17 +13,13 @@ CREATE TABLE IF NOT EXISTS bl_dm.fct_transactions (
     store_surr_id        BIGINT NOT NULL DEFAULT -1,
     customer_surr_id     BIGINT NOT NULL DEFAULT -1,
     employee_surr_id     BIGINT NOT NULL DEFAULT -1,
-
     transaction_date_sk  BIGINT NOT NULL,
     transaction_date     DATE   NOT NULL,
-
     source_system        VARCHAR(100) NOT NULL,
     source_table         VARCHAR(100) NOT NULL,
-
     insert_dt            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_dt            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT pk_fct_transactions
+    CONSTRAINT pk_fct_transactions_dd_dd
         PRIMARY KEY (
             transaction_date,
             transaction_src_id,
@@ -38,76 +34,75 @@ CREATE TABLE IF NOT EXISTS bl_dm.fct_transactions (
 
     CONSTRAINT fk_fct_trx_prod
         FOREIGN KEY (product_surr_id)
-        REFERENCES bl_dm.dim_products(product_surr_id),
+        REFERENCES dim.dim_products(product_surr_id),
 
     CONSTRAINT fk_fct_trx_prom
         FOREIGN KEY (promotion_surr_id)
-        REFERENCES bl_dm.dim_promotions(promotion_surr_id),
+        REFERENCES dim.dim_promotions(promotion_surr_id),
 
     CONSTRAINT fk_fct_trx_deliv
         FOREIGN KEY (delivery_surr_id)
-        REFERENCES bl_dm.dim_deliveries(delivery_surr_id),
+        REFERENCES dim.dim_deliveries(delivery_surr_id),
 
     CONSTRAINT fk_fct_trx_eng
         FOREIGN KEY (engagement_surr_id)
-        REFERENCES bl_dm.dim_engagements(engagement_surr_id),
+        REFERENCES dim.dim_engagements(engagement_surr_id),
 
     CONSTRAINT fk_fct_trx_store
         FOREIGN KEY (store_surr_id)
-        REFERENCES bl_dm.dim_stores(store_surr_id),
+        REFERENCES dim.dim_stores(store_surr_id),
 
     CONSTRAINT fk_fct_trx_cust
         FOREIGN KEY (customer_surr_id)
-        REFERENCES bl_dm.dim_customers(customer_surr_id),
+        REFERENCES dim.dim_customers(customer_surr_id),
 
     CONSTRAINT fk_fct_trx_emp
         FOREIGN KEY (employee_surr_id)
-        REFERENCES bl_dm.dim_employees_scd(employee_surr_id),
+        REFERENCES dim.dim_employees_scd(employee_surr_id),
 
     CONSTRAINT fk_fct_trx_date
         FOREIGN KEY (transaction_date_sk)
-        REFERENCES bl_dm.dim_dates(date_surr_id)
+        REFERENCES dim.dim_dates(date_surr_id)
 ) PARTITION BY RANGE (transaction_date);
 
-
 CREATE INDEX IF NOT EXISTS ix_fct_trx_date_sk
-    ON bl_dm.fct_transactions (transaction_date_sk);
+    ON dim.fct_transactions_dd_dd (transaction_date_sk);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_product
-    ON bl_dm.fct_transactions (product_surr_id);
+    ON dim.fct_transactions_dd_dd (product_surr_id);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_promotion
-    ON bl_dm.fct_transactions (promotion_surr_id);
+    ON dim.fct_transactions_dd (promotion_surr_id);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_delivery
-    ON bl_dm.fct_transactions (delivery_surr_id);
+    ON dim.fct_transactions_dd (delivery_surr_id);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_engagement
-    ON bl_dm.fct_transactions (engagement_surr_id);
+    ON dim.fct_transactions_dd (engagement_surr_id);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_store
-    ON bl_dm.fct_transactions (store_surr_id);
+    ON dim.fct_transactions_dd (store_surr_id);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_customer
-    ON bl_dm.fct_transactions (customer_surr_id);
+    ON dim.fct_transactions_dd (customer_surr_id);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_employee
-    ON bl_dm.fct_transactions (employee_surr_id);
+    ON dim.fct_transactions_dd (employee_surr_id);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_source
-    ON bl_dm.fct_transactions (source_system, source_table);
+    ON dim.fct_transactions_dd (source_system, source_table);
 
 CREATE INDEX IF NOT EXISTS ix_fct_trx_src_id
-    ON bl_dm.fct_transactions (transaction_src_id);
+    ON dim.fct_transactions_dd (transaction_src_id);
 
-CREATE OR REPLACE PROCEDURE bl_dm.load_fct_transactions_by_month(
+CREATE OR REPLACE PROCEDURE dim.load_fct_transactions_dd_by_month(
     p_year  INTEGER,
     p_month INTEGER
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_proc           TEXT := 'bl_dm.load_fct_transactions_by_month';
+    v_proc           TEXT :=  'dim.load_fct_transactions_dd_by_month';
     v_partition_name TEXT;
     v_start_date     DATE;
     v_end_date       DATE;
@@ -118,23 +113,20 @@ DECLARE
 BEGIN
     v_start_date := make_date(p_year, p_month, 1);
     v_end_date   := (v_start_date + INTERVAL '1 month')::DATE;
-    v_partition_name := 'fct_transactions_' || to_char(v_start_date, 'YYYYMM');
-
+    v_partition_name := 'fct_transactions_dd_' || to_char(v_start_date, 'YYYYMM');
     RAISE NOTICE '--------------------------------------------------';
     RAISE NOTICE 'Processing month: %', to_char(v_start_date, 'YYYY-MM');
     RAISE NOTICE 'Partition name: %', v_partition_name;
-
     BEGIN
-        EXECUTE format('ALTER TABLE bl_dm.fct_transactions DETACH PARTITION bl_dm.%I;', v_partition_name);
-        EXECUTE format('DROP TABLE bl_dm.%I;', v_partition_name);
+        EXECUTE format('ALTER TABLE dim.fct_transactions_dd DETACH PARTITION dim.%I;', v_partition_name);
+        EXECUTE format('DROP TABLE dim.%I;', v_partition_name);
         RAISE NOTICE 'Old partition detached and dropped: %', v_partition_name;
     EXCEPTION
         WHEN undefined_table THEN
             RAISE NOTICE 'No existing partition to drop for %', v_partition_name;
     END;
-
     EXECUTE format(
-        'CREATE TABLE bl_dm.%I PARTITION OF bl_dm.fct_transactions
+        'CREATE TABLE dim.%I PARTITION OF dim.fct_transactions_dd
          FOR VALUES FROM (%L) TO (%L);',
         v_partition_name, v_start_date, v_end_date
     );
@@ -142,7 +134,7 @@ BEGIN
     RAISE NOTICE 'Created new partition: %', v_partition_name;
 
     EXECUTE format($SQL$
-        INSERT INTO bl_dm.%I (
+        INSERT INTO dim.%I (
             transaction_src_id,
             total_sales,
             quantity,
@@ -181,7 +173,7 @@ BEGIN
             COALESCE(
                 (
                     SELECT des.employee_surr_id
-                    FROM bl_dm.dim_employees_scd des
+                    FROM dim.dim_employees_scd des
                     WHERE des.employee_src_id = t.employee_id
                       AND t.transaction_dt >= des.start_dt
                       AND t.transaction_dt <  des.end_dt
@@ -190,7 +182,7 @@ BEGIN
                 ),
                 (
                     SELECT des.employee_surr_id
-                    FROM bl_dm.dim_employees_scd des
+                    FROM dim.dim_employees_scd des
                     WHERE des.employee_src_id = t.employee_id
                       AND des.start_dt <= t.transaction_dt
                     ORDER BY des.start_dt DESC
@@ -198,7 +190,7 @@ BEGIN
                 ),
                 (
                     SELECT des.employee_surr_id
-                    FROM bl_dm.dim_employees_scd des
+                    FROM dim.dim_employees_scd des
                     WHERE des.employee_src_id = t.employee_id
                     ORDER BY des.start_dt ASC
                     LIMIT 1
@@ -212,15 +204,15 @@ BEGIN
             COALESCE(t.source_table, 'n.a.'),
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
-        FROM bl_3nf.ce_transactions t
-        JOIN bl_dm.dim_dates dd
+        FROM 3nf.nf_transactions t
+        JOIN dim.dim_dates dd
           ON dd.full_date = DATE(t.transaction_dt)
-        LEFT JOIN bl_dm.dim_products    dp  ON dp.product_src_id      = t.product_id
-        LEFT JOIN bl_dm.dim_promotions  dpr ON dpr.promotion_src_id   = t.promotion_id
-        LEFT JOIN bl_dm.dim_deliveries  ddv ON ddv.delivery_src_id    = t.delivery_id
-        LEFT JOIN bl_dm.dim_engagements den ON den.engagement_src_id  = t.engagement_id
-        LEFT JOIN bl_dm.dim_stores      ds  ON ds.store_src_id        = t.store_id
-        LEFT JOIN bl_dm.dim_customers   dc  ON dc.customer_src_id     = t.customer_id
+        LEFT JOIN dim.dim_products    dp  ON dp.product_src_id      = t.product_id
+        LEFT JOIN dim.dim_promotions  dpr ON dpr.promotion_src_id   = t.promotion_id
+        LEFT JOIN dim.dim_deliveries  ddv ON ddv.delivery_src_id    = t.delivery_id
+        LEFT JOIN dim.dim_engagements den ON den.engagement_src_id  = t.engagement_id
+        LEFT JOIN dim.dim_stores      ds  ON ds.store_src_id        = t.store_id
+        LEFT JOIN dim.dim_customers   dc  ON dc.customer_src_id     = t.customer_id
         WHERE dd.full_date >= %L
           AND dd.full_date <  %L;
     $SQL$, v_partition_name, v_start_date, v_end_date);
@@ -230,16 +222,15 @@ BEGIN
     RAISE NOTICE 'Loaded rows into % : %', v_partition_name, v_rows_inserted;
     RAISE NOTICE 'Finished month: %', to_char(v_start_date, 'YYYY-MM');
 
-    PERFORM bl_cl.log_etl_event(
+    PERFORM stg.log_etl_event(
         v_proc,
-        'bl_dm.fct_transactions',
+        'dim.fct_transactions_dd',
         v_rows_inserted,
         CASE WHEN v_rows_inserted > 0 THEN 'SUCCESS' ELSE 'NO_CHANGE' END,
         'Loaded month=' || to_char(v_start_date, 'YYYY-MM') ||
         ', partition=' || v_partition_name ||
         ', inserted=' || v_rows_inserted || '.'
     );
-
 EXCEPTION
 WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS
@@ -247,10 +238,9 @@ WHEN OTHERS THEN
         v_err_hint   = PG_EXCEPTION_HINT;
 
     v_err_msg := SQLERRM;
-
-    PERFORM bl_cl.log_etl_event(
+    PERFORM stg.log_etl_event(
         v_proc,
-        'bl_dm.fct_transactions',
+        'dim.fct_transactions_dd',
         0,
         'FAILED',
         'Monthly fact load failed for ' || COALESCE(to_char(v_start_date, 'YYYY-MM'), 'n.a.'),
@@ -263,12 +253,12 @@ WHEN OTHERS THEN
 END;
 $$;
 
-
-CREATE OR REPLACE PROCEDURE bl_cl.master_transactions_monthly_load()
+--bulk load
+CREATE OR REPLACE PROCEDURE stg.master_transactions_monthly_load()
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_proc             TEXT := 'bl_cl.master_transactions_monthly_load';
+    v_proc             TEXT := 'stg.master_transactions_monthly_load';
     v_last_loaded_date DATE;
     v_min_source_date  DATE;
     v_max_source_date  DATE;
@@ -280,14 +270,14 @@ DECLARE
 BEGIN
     SELECT MIN(DATE(transaction_dt)), MAX(DATE(transaction_dt))
     INTO v_min_source_date, v_max_source_date
-    FROM bl_3nf.ce_transactions
+    FROM 3nf.nf_transactions
     WHERE transaction_id <> 'n.a.';
 
     IF v_min_source_date IS NULL OR v_max_source_date IS NULL THEN
-        RAISE NOTICE 'No source rows found in bl_3nf.ce_transactions';
-        PERFORM bl_cl.log_etl_event(
+        RAISE NOTICE 'No source rows found in 3nf.nf_transactions';
+        PERFORM stg.log_etl_event(
             v_proc,
-            'bl_dm.fct_transactions',
+            'dim.fct_transactions_dd',
             0,
             'NO_CHANGE',
             'No source rows found. Nothing to load.'
@@ -297,7 +287,7 @@ BEGIN
 
     SELECT MAX(transaction_date)
     INTO v_last_loaded_date
-    FROM bl_dm.fct_transactions;
+    FROM dim.fct_transactions_dd;
 
     IF v_last_loaded_date IS NULL THEN
         v_start_loop_date := date_trunc('month', v_min_source_date)::DATE;
@@ -310,9 +300,9 @@ BEGIN
 
     IF v_start_loop_date > v_max_source_date THEN
         RAISE NOTICE 'No new months to load.';
-        PERFORM bl_cl.log_etl_event(
+        PERFORM stg.log_etl_event(
             v_proc,
-            'bl_dm.fct_transactions',
+            'dim.fct_transactions_dd',
             0,
             'NO_CHANGE',
             'No new months to load.'
@@ -327,7 +317,7 @@ BEGIN
     WHILE v_start_loop_date <= v_max_source_date LOOP
         RAISE NOTICE 'Calling monthly loader for %', to_char(v_start_loop_date, 'YYYY-MM');
 
-        CALL bl_dm.load_fct_transactions_by_month(
+        CALL dim.load_fct_transactions_dd_by_month(
             EXTRACT(YEAR  FROM v_start_loop_date)::INT,
             EXTRACT(MONTH FROM v_start_loop_date)::INT
         );
@@ -338,9 +328,9 @@ BEGIN
 
     RAISE NOTICE 'Master monthly load completed. Months loaded=%', v_months_loaded;
 
-    PERFORM bl_cl.log_etl_event(
+    PERFORM stg.log_etl_event(
         v_proc,
-        'bl_dm.fct_transactions',
+        'dim.fct_transactions_dd',
         v_months_loaded,
         'SUCCESS',
         'Master monthly load completed. Months loaded=' || v_months_loaded || '.'
@@ -354,9 +344,9 @@ WHEN OTHERS THEN
 
     v_err_msg := SQLERRM;
 
-    PERFORM bl_cl.log_etl_event(
+    PERFORM stg.log_etl_event(
         v_proc,
-        'bl_dm.fct_transactions',
+        'dim.fct_transactions_dd',
         0,
         'FAILED',
         'Master monthly load failed',
