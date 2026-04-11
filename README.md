@@ -1,4 +1,5 @@
-# Retail E2E Data Warehouse (PostgreSQL)
+#   WORK IN PROGRESS.. #
+#Retail E2E Data Warehouse (PostgreSQL)
 
 End-to-end retail data warehouse in PostgreSQL with ETL, dimensional modeling (star/snowflake), Python data profiling, and data quality checks.
 
