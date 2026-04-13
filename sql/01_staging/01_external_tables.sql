@@ -50,7 +50,7 @@ CREATE FOREIGN TABLE sl_offline_retail.frg_offline_retail (
 )
 SERVER csv_server
 OPTIONS (
-  filename  '/content/data/01_empty_95_off.csv', 
+  filename  '/content/data/01_empty_95_off.csv', -- copied from drive, it should be edited based on your environment
   format    'csv',
   header    'true',
   delimiter ',',
@@ -107,7 +107,7 @@ CREATE FOREIGN TABLE sl_online_retail.frg_online_retail (
 )
 SERVER csv_server
 OPTIONS (
-  filename  '/content/data/02_empty_95_on.csv',
+  filename  '/content/data/02_empty_95_on.csv', -- copied from drive, it should be edited based on your environment
   format    'csv',
   header    'true',
   delimiter ',',
