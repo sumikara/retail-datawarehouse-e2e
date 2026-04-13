@@ -1,6 +1,7 @@
 List of tables
 List of Columns
 Purpose of the layer
+Purpose of the default row
 data profiling
 entity by entity evaluation
 composite key logic/src key logic
