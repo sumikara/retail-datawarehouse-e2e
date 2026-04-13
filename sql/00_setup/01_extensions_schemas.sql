@@ -1,5 +1,3 @@
-CREATE DATABASE retail_dw;
-
 -- Extensions
 CREATE EXTENSION IF NOT EXISTS file_fdw;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -13,8 +11,8 @@ BEGIN
 END $$;
 
 -- Schemas
-CREATE SCHEMA IF NOT EXISTS sl_online_retail; 
+CREATE SCHEMA IF NOT EXISTS sl_online_retail;
 CREATE SCHEMA IF NOT EXISTS sl_offline_retail;
 CREATE SCHEMA IF NOT EXISTS stg;
-CREATE SCHEMA IF NOT EXISTS 3nf; -- normalized, Immon
+CREATE SCHEMA IF NOT EXISTS nf; -- normalized, Immon
 CREATE SCHEMA IF NOT EXISTS dim; -- denormalized, Kimball
