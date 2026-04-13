@@ -47,7 +47,6 @@ shutil.copy(f"{DRIVE_DIR}/04_empty_5_on.csv", DATA_DIR)
 print("All of them is copied! Files ready.")
 
 
--- see the JSON file in the artifacts
 # 04_SETUP -Permissions: Allow Colab for reaching out your Drive, otherwise, you'll get an error
 %%bash
 sudo chmod o+rx /content
