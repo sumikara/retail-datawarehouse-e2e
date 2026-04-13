@@ -1,5 +1,5 @@
 
--- # 23_ REPORTING DM LAYER - seq + ddls + indexes
+-- # REPORTING DM LAYER - seq + ddls + indexes
 
 CREATE SEQUENCE IF NOT EXISTS dim.seq_dim_customer_id START 1;
 CREATE SEQUENCE IF NOT EXISTS dim.seq_dim_store_id START 1;
