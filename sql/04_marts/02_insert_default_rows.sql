@@ -1,8 +1,3 @@
-%%bash
-set -e
-DB="retail_dw"
-
-sudo -u postgres psql -d "$DB" -v ON_ERROR_STOP=1 -P pager=off <<'SQL'
 
 /* =========================================================
    DEFAULT ROWS FOR DIM LAYER
