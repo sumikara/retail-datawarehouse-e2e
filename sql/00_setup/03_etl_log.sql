@@ -1,39 +1,20 @@
-
-
-CREATE SEQUENCE IF NOT EXISTS stg.etl_log_seq
-START WITH 1
-INCREMENT BY 1;
-
-
 CREATE TABLE IF NOT EXISTS stg.etl_log (
-
-    log_id BIGINT PRIMARY KEY
-        DEFAULT nextval('stg.etl_log_seq'),
-
-    log_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    log_id          BIGINT PRIMARY KEY DEFAULT nextval('stg.etl_log_seq'),
+    log_ts          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     log_schema_name TEXT DEFAULT 'STG',
-    procedure_name TEXT NOT NULL,
-    table_name TEXT,
-    rows_affected INTEGER DEFAULT 0,
-    status VARCHAR(20) DEFAULT 'SUCCESS',
-        -- SUCCESS
-        -- NO_CHANGE
-        -- FAILED
-        -- STARTED
-    log_type VARCHAR(20) DEFAULT 'INFO',
-        -- INFO
-        -- WARNING
-        -- ERROR
-    log_message TEXT,
-    error_detail TEXT,
-    inserted_rows INTEGER DEFAULT 0,
-    updated_rows  INTEGER DEFAULT 0,
-    deleted_rows  INTEGER DEFAULT 0,
-    closed_rows   INTEGER DEFAULT 0,
-    batch_id      BIGINT DEFAULT NULL
-
+    procedure_name  TEXT NOT NULL,
+    table_name      TEXT,
+    rows_affected   INTEGER DEFAULT 0,
+    status          VARCHAR(20) DEFAULT 'SUCCESS',
+    log_type        VARCHAR(20) DEFAULT 'INFO',
+    log_message     TEXT,
+    error_detail    TEXT,
+    inserted_rows   INTEGER DEFAULT 0,
+    updated_rows    INTEGER DEFAULT 0,
+    deleted_rows    INTEGER DEFAULT 0,
+    closed_rows     INTEGER DEFAULT 0,
+    batch_id        BIGINT DEFAULT NULL
 );
-
 
 CREATE OR REPLACE FUNCTION stg.log_etl_event(
     p_procedure_name TEXT,
@@ -92,5 +73,6 @@ SELECT
     status,
     log_ts,
     log_message
-FROM stg.etl_log;
+FROM stg.etl_log
+ORDER BY log_ts DESC;
 
