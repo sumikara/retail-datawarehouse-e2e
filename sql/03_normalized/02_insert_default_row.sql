@@ -1,5 +1,9 @@
+-- =========================================================
+-- DEFAULT / UNKNOWN ROWS FOR nf LAYER
+-- =========================================================
+
 -- states
-INSERT INTO 3nf.nf_states (
+INSERT INTO nf.nf_states (
     state_id, state_src_id, state_name,
     source_system, source_table, insert_dt
 )
@@ -8,11 +12,12 @@ SELECT
     'MANUAL', 'MANUAL', NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_states
+    FROM nf.nf_states
     WHERE state_id = -1
 );
+
 -- cities
-INSERT INTO 3nf.nf_cities (
+INSERT INTO nf.nf_cities (
     city_id, city_src_id, city_name, state_id,
     source_system, source_table, insert_dt
 )
@@ -21,12 +26,12 @@ SELECT
     'MANUAL', 'MANUAL', NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_cities
+    FROM nf.nf_cities
     WHERE city_id = -1
 );
 
---addressess
-INSERT INTO 3nf.nf_addresses (
+-- addresses
+INSERT INTO nf.nf_addresses (
     address_id, address_src_id, zip_code, city_id,
     source_system, source_table, insert_dt
 )
@@ -35,12 +40,12 @@ SELECT
     'MANUAL', 'MANUAL', NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_addresses
+    FROM nf.nf_addresses
     WHERE address_id = -1
 );
 
 -- customers
-INSERT INTO 3nf.nf_customers (
+INSERT INTO nf.nf_customers (
     customer_id, customer_src_id, customer_id_nk,
     gender, marital_status,
     birth_of_dt, membership_dt, last_purchase_dt,
@@ -56,32 +61,34 @@ SELECT
     -1,
     'MANUAL', 'MANUAL', NOW(), NOW()
 WHERE NOT EXISTS (
-    SELECT 1 FROM 3nf.nf_customers WHERE customer_id = -1
+    SELECT 1
+    FROM nf.nf_customers
+    WHERE customer_id = -1
 );
 
 -- stores
-INSERT INTO 3nf.nf_stores (
-    store_id, store_src_id, store_name, address_id,
+INSERT INTO nf.nf_stores (
+    store_id, store_src_id, store_name, store_location_nk, address_id,
     source_system, source_table, insert_dt, update_dt
 )
 SELECT
-    -1, 
-    'n.a.', 
-    'n.a.', 
     -1,
-    'MANUAL', 
-    'MANUAL', 
-    NOW(), 
+    'n.a.',
+    'n.a.',
+    'n.a.',
+    -1,
+    'MANUAL',
+    'MANUAL',
+    NOW(),
     NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_stores
+    FROM nf.nf_stores
     WHERE store_id = -1
 );
 
 -- product categories
-
-INSERT INTO 3nf.nf_product_categories (
+INSERT INTO nf.nf_product_categories (
     product_category_id, product_category_src_id, product_category_name,
     source_system, source_table, insert_dt
 )
@@ -94,14 +101,15 @@ SELECT
     NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_product_categories
+    FROM nf.nf_product_categories
     WHERE product_category_id = -1
 );
 
 -- products
-INSERT INTO 3nf.nf_products (
+INSERT INTO nf.nf_products (
     product_id,
     product_src_id,
+    product_id_nk,
     product_category_id,
     product_name,
     product_brand,
@@ -117,6 +125,7 @@ INSERT INTO 3nf.nf_products (
 SELECT
     -1,
     'n.a.',
+    'n.a.',
     -1,
     'n.a.',
     'n.a.',
@@ -130,12 +139,12 @@ SELECT
     NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_products
+    FROM nf.nf_products
     WHERE product_id = -1
 );
 
---promotion types
-INSERT INTO 3nf.nf_promotion_types (
+-- promotion types
+INSERT INTO nf.nf_promotion_types (
     promotion_type_id,
     promotion_type_src_id,
     promotion_type_name,
@@ -150,16 +159,17 @@ SELECT
     'MANUAL',
     'MANUAL',
     NOW()
-    WHERE NOT EXISTS (
+WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_promotion_types
+    FROM nf.nf_promotion_types
     WHERE promotion_type_id = -1
 );
 
 -- promotions
-INSERT INTO 3nf.nf_promotions (
+INSERT INTO nf.nf_promotions (
     promotion_id,
     promotion_src_id,
+    promotion_id_nk,
     promotion_type_id,
     promotion_channel,
     promotion_start_dt,
@@ -171,21 +181,22 @@ INSERT INTO 3nf.nf_promotions (
 SELECT
     -1,
     'n.a.',
+    'n.a.',
     -1,
     'n.a.',
-    TIMESTAMP '1900-01-01',
-    TIMESTAMP '1900-01-01',
+    TIMESTAMP '1900-01-01 00:00:00',
+    TIMESTAMP '1900-01-01 00:00:00',
     'MANUAL',
     'MANUAL',
     NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_promotions
+    FROM nf.nf_promotions
     WHERE promotion_id = -1
 );
 
---shipping partners
-INSERT INTO 3nf.nf_shipping_partners (
+-- shipping partners
+INSERT INTO nf.nf_shipping_partners (
     shipping_partner_id,
     shipping_partner_src_id,
     shipping_partner_name,
@@ -202,14 +213,15 @@ SELECT
     NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_shipping_partners
+    FROM nf.nf_shipping_partners
     WHERE shipping_partner_id = -1
 );
 
---deliveries
-INSERT INTO 3nf.nf_deliveries (
+-- deliveries
+INSERT INTO nf.nf_deliveries (
     delivery_id,
     delivery_src_id,
+    delivery_id_nk,
     shipping_partner_id,
     delivery_type,
     delivery_status,
@@ -220,6 +232,7 @@ INSERT INTO 3nf.nf_deliveries (
 SELECT
     -1,
     'n.a.',
+    'n.a.',
     -1,
     'n.a.',
     'n.a.',
@@ -228,14 +241,15 @@ SELECT
     NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_deliveries
+    FROM nf.nf_deliveries
     WHERE delivery_id = -1
 );
 
---engagements
-INSERT INTO 3nf.nf_engagements (
+-- engagements
+INSERT INTO nf.nf_engagements (
     engagement_id,
     engagement_src_id,
+    engagement_id_nk,
     customer_support_calls,
     website_address,
     order_channel,
@@ -251,6 +265,7 @@ INSERT INTO 3nf.nf_engagements (
 SELECT
     -1,
     'n.a.',
+    'n.a.',
     0,
     'n.a.',
     'n.a.',
@@ -264,15 +279,15 @@ SELECT
     NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_engagements
+    FROM nf.nf_engagements
     WHERE engagement_id = -1
 );
 
--- employees
-INSERT INTO 3nf.nf_employees_scd (
+-- employees scd
+INSERT INTO nf.nf_employees_scd (
     employee_id,
     employee_src_id,
-    employee_name,
+    employee_name_nk,
     employee_position,
     employee_salary,
     employee_hire_date,
@@ -300,7 +315,7 @@ SELECT
     NOW()
 WHERE NOT EXISTS (
     SELECT 1
-    FROM 3nf.nf_employees_scd
+    FROM nf.nf_employees_scd
     WHERE employee_id = -1
       AND start_dt = TIMESTAMP '1900-01-01 00:00:00'
 );
