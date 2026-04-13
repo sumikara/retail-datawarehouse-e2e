@@ -1,13 +1,13 @@
-
 CREATE SEQUENCE IF NOT EXISTS stg.etl_batch_run_seq START 1;
 CREATE SEQUENCE IF NOT EXISTS stg.etl_step_run_seq START 1;
 CREATE SEQUENCE IF NOT EXISTS stg.etl_file_registry_seq START 1;
+CREATE SEQUENCE IF NOT EXISTS stg.etl_log_seq START 1;
 
 CREATE TABLE IF NOT EXISTS stg.etl_batch_run (
     batch_id            BIGINT PRIMARY KEY DEFAULT nextval('stg.etl_batch_run_seq'),
     pipeline_name       VARCHAR(200) NOT NULL,
-    trigger_type        VARCHAR(50) NOT NULL DEFAULT 'MANUAL',   -- MANUAL / SCHEDULED
-    status              VARCHAR(30) NOT NULL DEFAULT 'STARTED',  -- STARTED / SUCCESS / FAILED
+    trigger_type        VARCHAR(50) NOT NULL DEFAULT 'MANUAL',
+    status              VARCHAR(30) NOT NULL DEFAULT 'STARTED',
     source_system       VARCHAR(100),
     initiated_by        VARCHAR(100) DEFAULT current_user,
     start_ts            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -20,12 +20,12 @@ CREATE TABLE IF NOT EXISTS stg.etl_batch_run (
 
 CREATE TABLE IF NOT EXISTS stg.etl_file_registry (
     file_id             BIGINT PRIMARY KEY DEFAULT nextval('stg.etl_file_registry_seq'),
-    source_system       VARCHAR(100) NOT NULL,                   -- online / offline
+    source_system       VARCHAR(100) NOT NULL,
     file_name           VARCHAR(500) NOT NULL,
     file_path           VARCHAR(1000) NOT NULL,
-    file_period         DATE,                                    -- e.g. 2026-03-01 for monthly batch
+    file_period         DATE,
     file_hash           VARCHAR(128),
-    status              VARCHAR(30) NOT NULL DEFAULT 'NEW',      -- NEW / IN_PROGRESS / DONE / FAILED / SKIPPED
+    status              VARCHAR(30) NOT NULL DEFAULT 'NEW',
     arrival_ts          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     processed_ts        TIMESTAMP,
     batch_id            BIGINT,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS stg.etl_step_run (
     step_name           VARCHAR(200) NOT NULL,
     step_order          INTEGER,
     target_object       VARCHAR(200),
-    status              VARCHAR(30) NOT NULL DEFAULT 'STARTED',  -- STARTED / SUCCESS / FAILED
+    status              VARCHAR(30) NOT NULL DEFAULT 'STARTED',
     start_ts            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     end_ts              TIMESTAMP,
     rows_inserted       BIGINT DEFAULT 0,
@@ -52,4 +52,3 @@ CREATE TABLE IF NOT EXISTS stg.etl_step_run (
     CONSTRAINT fk_step_batch
         FOREIGN KEY (batch_id) REFERENCES stg.etl_batch_run(batch_id)
 );
-
