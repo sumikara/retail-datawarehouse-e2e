@@ -1,1 +1,5 @@
+Test case files:
+- 01_layer_test_cases.sql
+- 02_entity_test_cases.sql
 
+These files contain English explanations and control queries for layer-based and entity-based DQ checks.

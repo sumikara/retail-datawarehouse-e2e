@@ -175,7 +175,7 @@ ON stg.mapping_stores (store_location_nk, source_system, source_table);
 CREATE INDEX IF NOT EXISTS idx_mapping_transactions_store_src
 ON stg.mapping_transactions (store_src_id);
 
-CREATE INDEX IF NOT EXISTS idx_mapping_transactions_store_src
+CREATE INDEX IF NOT EXISTS idx_mapping_transactions_store_src_sys_tbl
 ON stg.mapping_transactions (store_src_id, source_system, source_table);
 
 CREATE INDEX IF NOT EXISTS idx_mapping_products_nk
@@ -184,7 +184,7 @@ ON stg.mapping_products (product_id_nk, source_system, source_table);
 CREATE INDEX IF NOT EXISTS idx_mapping_transactions_product_src
 ON stg.mapping_transactions (product_src_id);
 
-CREATE INDEX IF NOT EXISTS idx_mapping_transactions_product_src
+CREATE INDEX IF NOT EXISTS idx_mapping_transactions_product_src_sys_tbl
 ON stg.mapping_transactions (product_src_id, source_system, source_table);
 
 CREATE INDEX IF NOT EXISTS idx_mapping_promotions_nk
@@ -199,7 +199,7 @@ ON stg.mapping_promotions (promotion_channel);
 CREATE INDEX IF NOT EXISTS idx_mapping_transactions_promotion_src
 ON stg.mapping_transactions (promotion_src_id);
 
-CREATE INDEX IF NOT EXISTS idx_mapping_transactions_promotion_src
+CREATE INDEX IF NOT EXISTS idx_mapping_transactions_promotion_src_sys_tbl
 ON stg.mapping_transactions (promotion_src_id, source_system, source_table);
 
 CREATE INDEX IF NOT EXISTS idx_mapping_deliveries_nk
@@ -214,7 +214,7 @@ ON stg.mapping_deliveries (delivery_type);
 CREATE INDEX IF NOT EXISTS idx_mapping_transactions_delivery_src
 ON stg.mapping_transactions (delivery_src_id);
 
-CREATE INDEX IF NOT EXISTS idx_mapping_transactions_delivery_src
+CREATE INDEX IF NOT EXISTS idx_mapping_transactions_delivery_src_sys_tbl
 ON stg.mapping_transactions (delivery_src_id, source_system, source_table);
 
 CREATE INDEX IF NOT EXISTS idx_mapping_engagements_nk
@@ -236,8 +236,14 @@ ON stg.mapping_employees (
 CREATE INDEX IF NOT EXISTS idx_mapping_transactions_employee_src
 ON stg.mapping_transactions (employee_src_id);
 
-CREATE INDEX IF NOT EXISTS idx_mapping_transactions_employee_src
+CREATE INDEX IF NOT EXISTS idx_mapping_transactions_employee_src_sys_tbl
 ON stg.mapping_transactions (employee_src_id, source_system, source_table);
+
+CREATE INDEX IF NOT EXISTS idx_mapping_transactions_city_src
+ON stg.mapping_transactions (city_src_id);
+
+CREATE INDEX IF NOT EXISTS idx_mapping_transactions_city_src_sys_tbl
+ON stg.mapping_transactions (city_src_id, source_system, source_table);
 
 CREATE INDEX IF NOT EXISTS idx_mapping_transactions_src
 ON stg.mapping_transactions (transaction_id, source_system, source_table);
@@ -247,4 +253,3 @@ ON stg.mapping_transactions (transaction_dt);
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_mapping_transactions_rowsig
 ON stg.mapping_transactions (row_sig);
-
