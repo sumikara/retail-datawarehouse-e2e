@@ -1,10 +1,6 @@
 
-/* =========================================================
-   DEFAULT ROWS FOR DIM LAYER
-   Purpose:
-   Add -1 surrogate fallback rows so fact loads can safely use
-   unknown dimension references.
-   ========================================================= */
+  -- Add -1 surrogate fallback rows so fact loads 
+-- can safely use unknown dimension references.
 
 /* -------------------------
    DIM_CUSTOMERS
@@ -246,7 +242,7 @@ INSERT INTO dim.dim_employees_scd (
 )
 SELECT
     -1,
-    -1,
+    'n.a.',
     'n.a.',
     'n.a.',
     -1,
@@ -263,7 +259,6 @@ WHERE NOT EXISTS (
     FROM dim.dim_employees_scd
     WHERE employee_surr_id = -1
 );
-
 
 /* -------------------------
    DIM_DATES
