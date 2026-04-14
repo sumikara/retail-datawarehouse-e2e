@@ -101,16 +101,20 @@ CREATE TABLE IF NOT EXISTS dim.dim_engagements (
 
 CREATE TABLE IF NOT EXISTS dim.dim_employees_scd (
     employee_surr_id   BIGINT PRIMARY KEY,
-    employee_src_id    BIGINT NOT NULL,                  -- 3NF employee_id
+    employee_src_id    VARCHAR(255) NOT NULL,
+
     employee_name      VARCHAR(100),
     employee_position  VARCHAR(100),
     employee_salary    NUMERIC(10,2),
     employee_hire_date DATE,
+
     start_dt           TIMESTAMP NOT NULL,
     end_dt             TIMESTAMP NOT NULL,
     is_active          BOOLEAN NOT NULL,
+
     source_system      VARCHAR(100) NOT NULL,
     source_table       VARCHAR(100) NOT NULL,
+
     insert_dt          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_dt          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
