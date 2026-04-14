@@ -31,7 +31,9 @@ As my local machine became too limited for sustained work, I moved part of the w
 
 - **Google Colab**
 - **Google Drive**
-
+- **Github Copilot Terminal**
+- **Claude**
+- **CodeX**
 This change allowed me to continue the project in a more flexible and resource-aware way. I see this transition as an example of environment adaptation rather than a compromise in technical ownership. The tools changed, but the project logic did not.
 
 ## Core tools and why I used them
