@@ -2,9 +2,11 @@
 #Retail E2E Data Warehouse (PostgreSQL)
 
 End-to-end retail data warehouse in PostgreSQL with ETL, dimensional modeling (star/snowflake), Python data profiling, and data quality checks.
+I designed a hybrid warehouse architecture: normalized integration core (Inmon-style EDW discipline) feeding dimensional marts (Kimball-style star schema) with process-level orchestration, observability, and data quality controls.
 
 ## Status
 In progress — scripts and documentation are being migrated and organized.
+I designed a hybrid warehouse architecture: normalized integration core (Inmon-style EDW discipline) feeding dimensional marts (Kimball-style star schema) with process-level orchestration, observability, and data quality controls.
 
 ## Repository structure (high level)
 - `sql/` – ETL and modeling scripts organized by layers

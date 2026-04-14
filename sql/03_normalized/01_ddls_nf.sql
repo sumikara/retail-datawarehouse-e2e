@@ -268,6 +268,21 @@ CREATE INDEX IF NOT EXISTS idx_nf_customers_nk
 CREATE INDEX IF NOT EXISTS idx_nf_transactions_customer
     ON nf.nf_transactions (customer_id);
 
+CREATE INDEX IF NOT EXISTS idx_nf_transactions_store
+    ON nf.nf_transactions (store_id);
+
+CREATE INDEX IF NOT EXISTS idx_nf_transactions_promotion
+    ON nf.nf_transactions (promotion_id);
+
+CREATE INDEX IF NOT EXISTS idx_nf_transactions_delivery
+    ON nf.nf_transactions (delivery_id);
+
+CREATE INDEX IF NOT EXISTS idx_nf_transactions_engagement
+    ON nf.nf_transactions (engagement_id);
+
+CREATE INDEX IF NOT EXISTS idx_nf_transactions_city
+    ON nf.nf_transactions (city_id);
+
 CREATE INDEX IF NOT EXISTS idx_nf_customers_address
     ON nf.nf_customers (address_id);
 
@@ -334,4 +349,3 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_nf_transactions_row_sig
 
 CREATE INDEX IF NOT EXISTS idx_nf_transactions_source
     ON nf.nf_transactions (source_system, source_table);
-
