@@ -700,7 +700,8 @@ DECLARE
     v_err_detail  TEXT;
     v_err_hint    TEXT;
 BEGIN
-    /* 1) Önce var olan versionları NF’ye göre senkronize et */
+    /* 1) First synchronize existing DIM versions with NF
+          so old active rows become inactive before new active rows are inserted */
     UPDATE dim.dim_employees_scd d
     SET
         employee_name      = e.employee_name_nk,
@@ -709,9 +710,11 @@ BEGIN
         employee_hire_date = e.employee_hire_date,
         end_dt             = e.end_dt,
         is_active          = e.is_active,
+        source_system      = 'nf',
+        source_table       = 'nf_employees_scd',
         update_dt          = NOW()
     FROM nf.nf_employees_scd e
-    WHERE d.employee_src_id = e.employee_id
+    WHERE d.employee_src_id = e.employee_src_id
       AND d.start_dt = e.start_dt
       AND e.employee_id <> -1
       AND (
@@ -721,11 +724,13 @@ BEGIN
          OR d.employee_hire_date IS DISTINCT FROM e.employee_hire_date
          OR d.end_dt             IS DISTINCT FROM e.end_dt
          OR d.is_active          IS DISTINCT FROM e.is_active
+         OR d.source_system      IS DISTINCT FROM 'nf'
+         OR d.source_table       IS DISTINCT FROM 'nf_employees_scd'
       );
 
     GET DIAGNOSTICS v_upd = ROW_COUNT;
 
-    /* 2) Eksik versionları insert et */
+    /* 2) Then insert only missing DIM versions */
     INSERT INTO dim.dim_employees_scd (
         employee_surr_id,
         employee_src_id,
@@ -743,7 +748,7 @@ BEGIN
     )
     SELECT
         nextval('dim.seq_dim_employee_id'),
-        e.employee_id,
+        e.employee_src_id,
         e.employee_name_nk,
         e.employee_position,
         e.employee_salary,
@@ -757,7 +762,7 @@ BEGIN
         NOW()
     FROM nf.nf_employees_scd e
     LEFT JOIN dim.dim_employees_scd d
-        ON d.employee_src_id = e.employee_id
+        ON d.employee_src_id = e.employee_src_id
        AND d.start_dt = e.start_dt
     WHERE e.employee_id <> -1
       AND d.employee_surr_id IS NULL;
@@ -769,10 +774,8 @@ BEGIN
         'dim.dim_employees_scd',
         v_ins + v_upd,
         CASE WHEN v_ins + v_upd > 0 THEN 'SUCCESS' ELSE 'NO_CHANGE' END,
-        'Inserted=' || v_ins || ', Updated=' || v_upd || '. Mirrored employee SCD history from nf to dim.'
+        'Inserted=' || v_ins || ', Updated=' || v_upd || '. Mirrored employee SCD history from NF to DIM.'
     );
-
-    RAISE NOTICE 'dim.dim_employees_scd completed. inserted=%, updated=%', v_ins, v_upd;
 
 EXCEPTION
 WHEN OTHERS THEN
