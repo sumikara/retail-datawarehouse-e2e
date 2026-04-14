@@ -1,62 +1,99 @@
-# colab use jupyter notebook, eğer localde postgre sql, dbeaver vs gibi programlara erişimini yoksa 
-bu proje colab ve drive iş birliği ile (ya da colab localden de cekebilir dosyaları, burada COPY önemine değin) aşağıdaki bloklar çalıştırılarak da implement edilebilir.
+"""
+Colab/local bootstrap helper for the retail DWH project.
 
+Usage (Colab):
+    python colab_env.py --install-postgres --copy-from-drive
 
-%%bash
-echo test
-# 00_SETUP
+Usage (local Linux):
+    python colab_env.py --install-postgres
+"""
 
-ps aux | grep -E 'python|jupyter|postgres|psql' | grep -v grep
+from __future__ import annotations
 
-pkill -f psql || true
-pkill -f postgres || true
-
-echo "cleanup done."
-
-%%bash
-set -e
-# 01_SETUP
-# 1) PostgreSQL install
-apt-get update -y
-apt-get install -y postgresql postgresql-contrib
-
-# 2) Start cluster (Colab’ta systemd yok; pg_ctlcluster ile başlatıyoruz)
-pg_ctlcluster 14 main start || true
-
-# 3) Quick health check
-sudo -u postgres psql -c "select version();"
-sudo -u postgres psql -c "show data_directory;"
-sudo -u postgres psql -c "select now();"
-
-# 02_SETUP - Copy the dataset from Drive
-from google.colab import drive
+import argparse
 import os
 import shutil
-
-drive.mount('/content/drive')
-
-DATA_DIR = "/content/data"
-DRIVE_DIR = "/content/drive/MyDrive/retail_dw_data"
-
-os.makedirs(DATA_DIR, exist_ok=True)
-print("CSV files have been copying on Colab disk...")
-shutil.copy(f"{DRIVE_DIR}/01_empty_95_off.csv", DATA_DIR)
-shutil.copy(f"{DRIVE_DIR}/02_empty_95_on.csv", DATA_DIR)
-shutil.copy(f"{DRIVE_DIR}/03_empty_5_off.csv", DATA_DIR)
-shutil.copy(f"{DRIVE_DIR}/04_empty_5_on.csv", DATA_DIR)
-print("All of them is copied! Files ready.")
+import subprocess
+from pathlib import Path
 
 
-# 04_SETUP -Permissions: Allow Colab for reaching out your Drive, otherwise, you'll get an error
-%%bash
-sudo chmod o+rx /content
-sudo chmod o+rx /content/data
-sudo chmod o+r /content/data/01_empty_95_off.csv
-sudo chmod o+r /content/data/02_empty_95_on.csv
-sudo chmod o+r /content/data/03_empty_5_off.csv
-sudo chmod o+r /content/data/04_empty_5_on.csv
+DATA_DIR = Path("/content/data")
+DRIVE_DIR = Path("/content/drive/MyDrive/retail_dw_data")
 
 
+def run(cmd: str) -> None:
+    subprocess.run(cmd, shell=True, check=True)
 
 
-  
+def cleanup_processes() -> None:
+    run("pkill -f psql || true")
+    run("pkill -f postgres || true")
+
+
+def install_postgres() -> None:
+    run("apt-get update -y")
+    run("apt-get install -y postgresql postgresql-contrib")
+    run("pg_ctlcluster 14 main start || true")
+    run("sudo -u postgres psql -c \"select version();\"")
+    run("sudo -u postgres psql -c \"show data_directory;\"")
+    run("sudo -u postgres psql -c \"select now();\"")
+
+
+def mount_drive_if_available() -> None:
+    try:
+        from google.colab import drive  # type: ignore
+    except Exception as exc:  # pragma: no cover
+        raise RuntimeError("google.colab is not available in this environment.") from exc
+
+    drive.mount("/content/drive")
+
+
+def copy_datasets_from_drive() -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    files = [
+        "01_empty_95_off.csv",
+        "02_empty_95_on.csv",
+        "03_empty_5_off.csv",
+        "04_empty_5_on.csv",
+    ]
+    for file_name in files:
+        src = DRIVE_DIR / file_name
+        dst = DATA_DIR / file_name
+        if not src.exists():
+            raise FileNotFoundError(f"Dataset not found on Drive: {src}")
+        shutil.copy(src, dst)
+
+    run("sudo chmod o+rx /content || true")
+    run(f"sudo chmod o+rx {DATA_DIR} || true")
+    for file_name in files:
+        run(f"sudo chmod o+r {DATA_DIR / file_name} || true")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Bootstrap retail DWH environment.")
+    parser.add_argument("--cleanup", action="store_true", help="Stop existing psql/postgres processes.")
+    parser.add_argument("--install-postgres", action="store_true", help="Install and initialize PostgreSQL.")
+    parser.add_argument("--copy-from-drive", action="store_true", help="Mount Google Drive and copy CSV datasets.")
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+
+    if args.cleanup:
+        cleanup_processes()
+
+    if args.install_postgres:
+        install_postgres()
+
+    if args.copy_from_drive:
+        mount_drive_if_available()
+        copy_datasets_from_drive()
+
+    if not any([args.cleanup, args.install_postgres, args.copy_from_drive]):
+        print("No action requested. Use --help for available options.")
+
+
+if __name__ == "__main__":
+    main()

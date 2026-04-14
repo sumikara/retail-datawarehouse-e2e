@@ -1,1 +1,9 @@
+Test case files:
+- 01_layer_test_cases.sql
+- 02_entity_test_cases.sql
+- 03_system_test_suite.sql
 
+These files contain English explanations and control queries for:
+- Layer-based DQ checks
+- Entity-based DQ checks
+- Smoke + Unit-like + Regression test suite
