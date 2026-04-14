@@ -1338,130 +1338,40 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     v_proc        TEXT := 'stg.load_ce_employees_scd';
+    v_closed      INT  := 0;
     v_ins         INT  := 0;
-    v_upd         INT  := 0;
     v_err_msg     TEXT;
     v_err_detail  TEXT;
     v_err_hint    TEXT;
 BEGIN
-    DROP TABLE IF EXISTS tmp_employee_versions;
-    DROP TABLE IF EXISTS tmp_employee_keys;
-    DROP TABLE IF EXISTS tmp_employee_new_keys;
-    DROP TABLE IF EXISTS tmp_employee_versions_with_id;
-    DROP TABLE IF EXISTS tmp_employee_versions_final;
-    DROP TABLE IF EXISTS tmp_employee_affected;
+    DROP TABLE IF EXISTS tmp_employee_src;
+    DROP TABLE IF EXISTS tmp_employee_changes;
 
-    /* 1) exact duplicate source rows */
-    CREATE TEMP TABLE tmp_employee_versions ON COMMIT DROP AS
-    WITH raw_employee_versions AS (
+    CREATE TEMP TABLE tmp_employee_src
+    ON COMMIT DROP
+    AS
+    WITH ranked_src AS (
         SELECT
-            COALESCE(src.employee_name, 'n.a.') || '-' ||
-            COALESCE(src.employee_hire_date::TEXT, '1900-01-01') AS employee_src_id,
-            COALESCE(src.employee_name, 'n.a.')                  AS employee_name_nk,
-            COALESCE(src.employee_position, 'n.a.')              AS employee_position,
-            src.employee_salary,
-            src.employee_hire_date,
-            COALESCE(src.transaction_dt, TIMESTAMP '1900-01-01 00:00:00') AS observed_ts,
-            'sl_offline_retail'::VARCHAR(100)                    AS source_system,
-            'src_offline_retail'::VARCHAR(100)                   AS source_table,
+            s.employee_src_id,
+            s.employee_name_nk,
+            s.employee_position,
+            s.employee_salary,
+            s.employee_hire_date,
+            COALESCE(s.observed_ts, TIMESTAMP '1900-01-01 00:00:00') AS observed_ts,
+            s.source_system,
+            s.source_table,
             ROW_NUMBER() OVER (
-                PARTITION BY
-                    COALESCE(src.employee_name, 'n.a.') || '-' || COALESCE(src.employee_hire_date::TEXT, '1900-01-01'),
-                    COALESCE(src.employee_name, 'n.a.'),
-                    COALESCE(src.employee_position, 'n.a.'),
-                    src.employee_salary,
-                    src.employee_hire_date,
-                    COALESCE(src.transaction_dt, TIMESTAMP '1900-01-01 00:00:00')
-                ORDER BY COALESCE(src.transaction_dt, TIMESTAMP '1900-01-01 00:00:00')
-            ) AS rn_exact
-        FROM sl_offline_retail.src_offline_retail src
-        WHERE COALESCE(src.employee_name, 'n.a.') <> 'n.a.'
-    )
-    SELECT
-        employee_src_id,
-        employee_name_nk,
-        employee_position,
-        employee_salary,
-        employee_hire_date,
-        observed_ts,
-        source_system,
-        source_table
-    FROM raw_employee_versions
-    WHERE rn_exact = 1
-      AND employee_src_id <> 'n.a.-1900-01-01';
-
-    CREATE INDEX idx_tmp_employee_versions_src_id
-        ON tmp_employee_versions (employee_src_id);
-
-    CREATE INDEX idx_tmp_employee_versions_src_id_ts
-        ON tmp_employee_versions (employee_src_id, observed_ts);
-
-    /* 2) existing keys */
-    CREATE TEMP TABLE tmp_employee_keys ON COMMIT DROP AS
-    SELECT DISTINCT
-        employee_src_id,
-        employee_id
-    FROM nf.nf_employees_scd;
-
-    CREATE INDEX idx_tmp_employee_keys_src_id
-        ON tmp_employee_keys (employee_src_id);
-
-    /* 3) new keys */
-    CREATE TEMP TABLE tmp_employee_new_keys ON COMMIT DROP AS
-    SELECT
-        v.employee_src_id,
-        nextval('nf.seq_nf_employee_id') AS employee_id
-    FROM (
-        SELECT DISTINCT employee_src_id
-        FROM tmp_employee_versions
-    ) v
-    LEFT JOIN tmp_employee_keys k
-        ON k.employee_src_id = v.employee_src_id
-    WHERE k.employee_src_id IS NULL;
-
-    /* 4) assign employee_id */
-    CREATE TEMP TABLE tmp_employee_versions_with_id ON COMMIT DROP AS
-    SELECT
-        COALESCE(k.employee_id, nk.employee_id) AS employee_id,
-        v.employee_src_id,
-        v.employee_name_nk,
-        v.employee_position,
-        v.employee_salary,
-        v.employee_hire_date,
-        v.observed_ts,
-        v.source_system,
-        v.source_table
-    FROM tmp_employee_versions v
-    LEFT JOIN tmp_employee_keys k
-        ON k.employee_src_id = v.employee_src_id
-    LEFT JOIN tmp_employee_new_keys nk
-        ON nk.employee_src_id = v.employee_src_id;
-
-    /* 5) FINAL DEDUP FOR PK GRAIN = (employee_id, start_dt) */
-    CREATE TEMP TABLE tmp_employee_versions_final ON COMMIT DROP AS
-    WITH ranked AS (
-        SELECT
-            employee_id,
-            employee_src_id,
-            employee_name_nk,
-            employee_position,
-            employee_salary,
-            employee_hire_date,
-            observed_ts,
-            source_system,
-            source_table,
-            ROW_NUMBER() OVER (
-                PARTITION BY employee_id, observed_ts
+                PARTITION BY s.employee_src_id
                 ORDER BY
-                    employee_position,
-                    employee_salary DESC NULLS LAST,
-                    employee_name_nk,
-                    source_table
-            ) AS rn_pk
-        FROM tmp_employee_versions_with_id
+                    COALESCE(s.observed_ts, TIMESTAMP '1900-01-01 00:00:00') DESC,
+                    s.employee_salary DESC NULLS LAST,
+                    s.source_table DESC
+            ) AS rn
+        FROM stg.mapping_employees s
+        WHERE s.employee_src_id IS NOT NULL
+          AND s.employee_src_id <> 'n.a.-1900-01-01'
     )
     SELECT
-        employee_id,
         employee_src_id,
         employee_name_nk,
         employee_position,
@@ -1470,13 +1380,61 @@ BEGIN
         observed_ts,
         source_system,
         source_table
-    FROM ranked
-    WHERE rn_pk = 1;
+    FROM ranked_src
+    WHERE rn = 1;
 
-    CREATE INDEX idx_tmp_employee_versions_final
-        ON tmp_employee_versions_final (employee_src_id, observed_ts);
+    CREATE INDEX idx_tmp_employee_src_id
+        ON tmp_employee_src (employee_src_id);
 
-    /* 6) insert only missing versions */
+    CREATE TEMP TABLE tmp_employee_changes
+    ON COMMIT DROP
+    AS
+    SELECT
+        src.employee_src_id,
+        src.employee_name_nk,
+        src.employee_position,
+        src.employee_salary,
+        src.employee_hire_date,
+        src.observed_ts,
+        src.source_system,
+        src.source_table,
+        cur.employee_id,
+        cur.start_dt AS current_start_dt,
+        cur.end_dt   AS current_end_dt,
+        cur.is_active,
+        CASE
+            WHEN cur.employee_id IS NULL THEN 'NEW'
+            WHEN cur.employee_position IS DISTINCT FROM src.employee_position
+              OR cur.employee_salary   IS DISTINCT FROM src.employee_salary
+            THEN 'CHANGED'
+            ELSE 'NO_CHANGE'
+        END AS change_type
+    FROM tmp_employee_src src
+    LEFT JOIN nf.nf_employees_scd cur
+        ON cur.employee_src_id = src.employee_src_id
+       AND cur.is_active = TRUE;
+
+    UPDATE nf.nf_employees_scd tgt
+    SET
+        end_dt    = CASE
+                        WHEN ch.observed_ts > tgt.start_dt
+                        THEN ch.observed_ts
+                        ELSE tgt.end_dt
+                    END,
+        is_active = CASE
+                        WHEN ch.observed_ts > tgt.start_dt
+                        THEN FALSE
+                        ELSE tgt.is_active
+                    END,
+        update_dt = CURRENT_TIMESTAMP
+    FROM tmp_employee_changes ch
+    WHERE tgt.employee_src_id = ch.employee_src_id
+      AND tgt.is_active = TRUE
+      AND ch.change_type = 'CHANGED'
+      AND ch.observed_ts > tgt.start_dt;
+
+    GET DIAGNOSTICS v_closed = ROW_COUNT;
+
     INSERT INTO nf.nf_employees_scd (
         employee_id,
         employee_src_id,
@@ -1493,82 +1451,55 @@ BEGIN
         update_dt
     )
     SELECT
-        s.employee_id,
-        s.employee_src_id,
-        s.employee_name_nk,
-        s.employee_position,
-        s.employee_salary,
-        s.employee_hire_date,
-        s.observed_ts,
+        COALESCE(ch.employee_id, nextval('nf.seq_nf_employee_id')),
+        ch.employee_src_id,
+        ch.employee_name_nk,
+        ch.employee_position,
+        ch.employee_salary,
+        ch.employee_hire_date,
+        CASE
+            WHEN ch.observed_ts > COALESCE(ch.current_start_dt, TIMESTAMP '1900-01-01 00:00:00')
+            THEN ch.observed_ts
+            ELSE CURRENT_TIMESTAMP
+        END AS start_dt,
         TIMESTAMP '9999-12-31 23:59:59',
-        FALSE,
-        s.source_system,
-        s.source_table,
+        TRUE,
+        ch.source_system,
+        ch.source_table,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
-    FROM tmp_employee_versions_final s
-    LEFT JOIN nf.nf_employees_scd t
-        ON t.employee_id = s.employee_id
-       AND t.start_dt = s.observed_ts
-    WHERE t.employee_id IS NULL;
+    FROM tmp_employee_changes ch
+    WHERE ch.change_type = 'NEW'
+       OR (
+            ch.change_type = 'CHANGED'
+            AND ch.observed_ts > COALESCE(ch.current_start_dt, TIMESTAMP '1900-01-01 00:00:00')
+       );
 
     GET DIAGNOSTICS v_ins = ROW_COUNT;
-
-    /* 7) affected employees */
-    CREATE TEMP TABLE tmp_employee_affected ON COMMIT DROP AS
-    SELECT DISTINCT employee_src_id
-    FROM tmp_employee_versions_final;
-
-    /* 8) rebuild SCD2 timeline */
-    WITH ordered_hist AS (
-        SELECT
-            n.employee_src_id,
-            n.start_dt,
-            LEAD(n.start_dt) OVER (
-                PARTITION BY n.employee_src_id
-                ORDER BY n.start_dt
-            ) AS next_start_dt
-        FROM nf.nf_employees_scd n
-        JOIN tmp_employee_affected a
-          ON a.employee_src_id = n.employee_src_id
-    )
-    UPDATE nf.nf_employees_scd t
-    SET
-        end_dt = COALESCE(o.next_start_dt, TIMESTAMP '9999-12-31 23:59:59'),
-        is_active = CASE WHEN o.next_start_dt IS NULL THEN TRUE ELSE FALSE END,
-        update_dt = CURRENT_TIMESTAMP
-    FROM ordered_hist o
-    WHERE t.employee_src_id = o.employee_src_id
-      AND t.start_dt = o.start_dt
-      AND (
-            t.end_dt IS DISTINCT FROM COALESCE(o.next_start_dt, TIMESTAMP '9999-12-31 23:59:59')
-         OR t.is_active IS DISTINCT FROM CASE WHEN o.next_start_dt IS NULL THEN TRUE ELSE FALSE END
-      );
-
-    GET DIAGNOSTICS v_upd = ROW_COUNT;
 
     PERFORM stg.log_etl_event(
         v_proc,
         'nf.nf_employees_scd',
-        v_ins + v_upd,
-        CASE WHEN v_ins + v_upd > 0 THEN 'SUCCESS' ELSE 'NO_CHANGE' END,
-        'Employee SCD2 load completed. Inserted=' || v_ins || ', History-updated=' || v_upd,
+        v_closed + v_ins,
+        CASE WHEN (v_closed + v_ins) > 0 THEN 'SUCCESS' ELSE 'NO_CHANGE' END,
+        'Employee SCD2 load completed. Closed=' || v_closed || ', Inserted=' || v_ins,
         NULL,
         'INFO',
         v_ins,
         0,
         0,
-        v_upd,
+        v_closed,
         NULL
     );
 
-    RAISE NOTICE 'nf.nf_employees_scd completed. inserted=%, history_updated=%', v_ins, v_upd;
+    RAISE NOTICE 'nf.nf_employees_scd completed. closed=%, inserted=%', v_closed, v_ins;
 
 EXCEPTION
 WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS
         v_err_detail = PG_EXCEPTION_DETAIL,
         v_err_hint   = PG_EXCEPTION_HINT;
+
     v_err_msg := SQLERRM;
 
     PERFORM stg.log_etl_event(
@@ -1576,15 +1507,15 @@ WHEN OTHERS THEN
         'nf.nf_employees_scd',
         0,
         'FAILED',
-        'Employee SCD2 load failed',
+        'Employee SCD2 upsert failed',
         v_err_msg || ' | DETAIL=' || COALESCE(v_err_detail, 'n.a.')
                   || ' | HINT='   || COALESCE(v_err_hint, 'n.a.'),
         'ERROR'
     );
+
     RAISE;
 END;
 $$;
-
 
 CREATE OR REPLACE PROCEDURE stg.load_ce_transactions()
 LANGUAGE plpgsql
