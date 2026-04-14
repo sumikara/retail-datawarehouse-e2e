@@ -14,7 +14,7 @@
 ## Keys
 - `<entity>_id_nk` for natural key evidence
 - `<entity>_src_id` for standardized source identity
-- `<entity>_id` / `<entity>_surr_id` for surrogate keys
+- `<entity>_id` in `nf` / `<entity>_surr_id` in `dim` for surrogate keys
 
 ## Procedures
 - `load_map_*`, `load_ce_*`, `load_dim_*`, `master_*`
