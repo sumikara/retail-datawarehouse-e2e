@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS nf.nf_promotions (
         FOREIGN KEY (promotion_type_id) REFERENCES nf.nf_promotion_types(promotion_type_id),
     CONSTRAINT uq_nf_promotions_src UNIQUE (promotion_src_id)
 );
-
+--nf
 CREATE TABLE IF NOT EXISTS nf.nf_deliveries (
     delivery_id          BIGINT PRIMARY KEY,
     delivery_src_id      VARCHAR(255) NOT NULL,
