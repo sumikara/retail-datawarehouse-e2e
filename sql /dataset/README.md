@@ -14,7 +14,7 @@ The original Kaggle file is wide and already contains many precomputed or analys
 
 Instead, I intentionally simplified the source and used it as a **raw training base** for designing cleaner operational-style inputs and deriving business metrics later in the warehouse and mart layers.
 
-## Adaptation strategy for the DWH project
+## Data adaptation strategy for the DWH project
 
 After downloading the CSV, I adapted the dataset in three steps.
 
