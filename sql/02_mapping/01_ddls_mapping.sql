@@ -90,16 +90,16 @@ CREATE TABLE IF NOT EXISTS stg.mapping_engagements (
 );
 
 CREATE TABLE IF NOT EXISTS stg.mapping_employees (
-    employee_src_id     VARCHAR(100) NOT NULL,            -- derived employee key
+    employee_src_id     VARCHAR(100) NOT NULL,
     employee_name_nk    VARCHAR(100),
     employee_position   VARCHAR(100),
     employee_salary     NUMERIC(10,2),
     employee_hire_date  DATE,
-    source_system       VARCHAR(100),                     -- sl_offline_retail
-    source_table        VARCHAR(100),                     -- src_offline_retail
+    observed_ts         TIMESTAMP,
+    source_system       VARCHAR(100),
+    source_table        VARCHAR(100),
     insert_dt           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 
 
 CREATE TABLE IF NOT EXISTS stg.mapping_transactions (
