@@ -756,7 +756,6 @@ $$;
    Version-level duplicate prevention is intentionally used.
    ========================================================= */
 
-
 CREATE OR REPLACE PROCEDURE stg.load_map_employees()
 LANGUAGE plpgsql
 AS $$
@@ -775,29 +774,24 @@ BEGIN
         employee_position   VARCHAR(100),
         employee_salary     NUMERIC(10,2),
         employee_hire_date  DATE,
+        observed_ts         TIMESTAMP,
         source_system       VARCHAR(100),
         source_table        VARCHAR(100)
     ) ON COMMIT DROP;
 
-    INSERT INTO tmp_employee_map_source (
-        employee_src_id,
-        employee_name_nk,
-        employee_position,
-        employee_salary,
-        employee_hire_date,
-        source_system,
-        source_table
-    )
+    INSERT INTO tmp_employee_map_source
     SELECT DISTINCT
-        src.employee_name || '-' || src.employee_hire_date AS employee_src_id,
-        src.employee_name AS employee_name_nk,
-        src.employee_position,
+        src.employee_name || '-' || src.employee_hire_date::text AS employee_src_id,
+        COALESCE(src.employee_name, 'n.a.')     AS employee_name_nk,
+        COALESCE(src.employee_position, 'n.a.') AS employee_position,
         src.employee_salary,
         src.employee_hire_date,
+        COALESCE(src.transaction_dt, TIMESTAMP '1900-01-01 00:00:00') AS observed_ts,
         'sl_offline_retail' AS source_system,
         'src_offline_retail' AS source_table
     FROM sl_offline_retail.src_offline_retail src
-    WHERE COALESCE(src.employee_name, 'n.a.') <> 'n.a.';
+    WHERE src.employee_name IS NOT NULL
+      AND src.employee_hire_date IS NOT NULL;
 
     IF to_regclass('sl_offline_retail.src_offline_retail_employee_inc') IS NOT NULL THEN
         INSERT INTO tmp_employee_map_source (
@@ -806,19 +800,21 @@ BEGIN
             employee_position,
             employee_salary,
             employee_hire_date,
+            observed_ts,
             source_system,
             source_table
         )
-        SELECT DISTINCT
-            inc.employee_name || '-' || inc.employee_hire_date AS employee_src_id,
-            inc.employee_name AS employee_name_nk,
-            inc.employee_position,
+        SELECT
+            inc.employee_src_id,
+            COALESCE(inc.employee_name, 'n.a.')     AS employee_name_nk,
+            COALESCE(inc.employee_position, 'n.a.') AS employee_position,
             inc.employee_salary,
             inc.employee_hire_date,
+            COALESCE(inc.transaction_dt, TIMESTAMP '1900-01-01 00:00:00') AS observed_ts,
             'sl_offline_retail',
             'src_offline_retail_employee_inc'
         FROM sl_offline_retail.src_offline_retail_employee_inc inc
-        WHERE COALESCE(inc.employee_name, 'n.a.') <> 'n.a.';
+        WHERE inc.employee_src_id IS NOT NULL;
     END IF;
 
     INSERT INTO stg.mapping_employees (
@@ -827,6 +823,7 @@ BEGIN
         employee_position,
         employee_salary,
         employee_hire_date,
+        observed_ts,
         source_system,
         source_table
     )
@@ -836,16 +833,22 @@ BEGIN
         s.employee_position,
         s.employee_salary,
         s.employee_hire_date,
+        s.observed_ts,
         s.source_system,
         s.source_table
     FROM tmp_employee_map_source s
     WHERE s.employee_src_id IS NOT NULL
       AND NOT EXISTS (
-            SELECT 1
-            FROM stg.mapping_employees t
-            WHERE t.employee_src_id = s.employee_src_id
-              AND t.source_system = s.source_system
-              AND t.source_table  = s.source_table
+        SELECT 1
+        FROM stg.mapping_employees t
+        WHERE t.employee_src_id = s.employee_src_id
+          AND COALESCE(t.employee_name_nk, 'n.a.') = COALESCE(s.employee_name_nk, 'n.a.')
+          AND COALESCE(t.employee_position, 'n.a.') = COALESCE(s.employee_position, 'n.a.')
+          AND COALESCE(t.employee_salary, -1) = COALESCE(s.employee_salary, -1)
+          AND COALESCE(t.employee_hire_date, DATE '1900-01-01') = COALESCE(s.employee_hire_date, DATE '1900-01-01')
+          AND COALESCE(t.observed_ts, TIMESTAMP '1900-01-01 00:00:00') = COALESCE(s.observed_ts, TIMESTAMP '1900-01-01 00:00:00')
+          AND t.source_system = s.source_system
+          AND t.source_table  = s.source_table
       );
 
     GET DIAGNOSTICS v_ins = ROW_COUNT;
@@ -855,10 +858,10 @@ BEGIN
         'stg.mapping_employees',
         v_ins,
         CASE WHEN v_ins > 0 THEN 'SUCCESS' ELSE 'NO_CHANGE' END,
-        'Inserted=' || v_ins || '. Loaded employee mapping rows using employee-level version preservation.'
+        'Inserted=' || v_ins || '. Loaded employee mapping rows.'
     );
-    RAISE NOTICE 'stg.mapping_employees completed. inserted=%', v_ins;
 
+    RAISE NOTICE 'stg.mapping_employees completed. inserted=%', v_ins;
 
 EXCEPTION
 WHEN OTHERS THEN
