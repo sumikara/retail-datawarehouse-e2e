@@ -42,7 +42,14 @@ The pipeline ingests, standardizes, normalizes (Inmon), and then denormalizes (K
 - **SCD Type 0, 1, and 2** strategies applied per entity based on business semantics
 - **Range partitioning** on the fact table, **BRIN and B-tree indexes** for query performance
 
-> 📌 *[VISUAL PLACEHOLDER — Project Architecture Overview Diagram: one-page high-level view showing CSV sources → PostgreSQL schemas → Power BI, with layer names and row counts]*
+```mermaid
+flowchart LR
+    A["Source CSV Files\nOnline + Offline"] --> B["Landing Layer\nsl_online_retail / sl_offline_retail"]
+    B --> C["Mapping & Lineage (stg)\nComposite keys + row_sig MD5 + ETL metadata"]
+    C --> D["Normalized Layer (nf)\n3NF Snowflake + Integration Fact"]
+    D --> E["Dimensional Layer (dim)\nStar Schema + Partitioned Fact"]
+    E --> F["Analytics Layer (Planned)\nPower BI + KPI + DQ Dashboards"]
+```
 
 ---
 
@@ -94,48 +101,30 @@ This project follows the **Hybrid Inmon-Kimball** architecture, also known as th
 
 In short, the platform is a **hybrid warehouse architecture** combining normalized integration with dimensional analytics.
 
-```
-[ SOURCE CSV FILES ]
-        │
-        ▼
-[ LANDING LAYER — sl_online_retail / sl_offline_retail ]
-   Foreign tables (file_fdw) + Raw tables (src_*_raw) + Standardized tables (src_*)
-        │
-        ▼
-[ MAPPING / LINEAGE LAYER — stg schema ]
-   Entity-by-entity mapping tables: mapping_customers, mapping_products,
-   mapping_promotions, mapping_deliveries, mapping_engagements,
-   mapping_employees, mapping_transactions
-   + Composite surrogate key derivation + row_sig MD5 deduplication
-   + ETL orchestration tables: etl_batch_run, etl_step_run, etl_log, etl_file_registry
-        │
-        ▼
-[ NORMALIZED LAYER (Inmon) — nf schema ]
-   3NF Snowflake Schema: nf_states → nf_cities → nf_addresses
-                         nf_customers, nf_stores, nf_products
-                         nf_promotions, nf_deliveries, nf_engagements
-                         nf_employees_scd (SCD Type 2)
-                         nf_transactions (integration fact)
-        │
-        ▼
-[ DIMENSIONAL LAYER (Kimball) — dim schema ]
-   Star Schema: dim_customers, dim_stores, dim_products, dim_promotions
-                dim_deliveries, dim_engagements, dim_employees_scd
-                dim_dates
-                fct_transactions_dd_dd (partitioned fact table)
-        │
-        ▼
-[ ANALYTICS LAYER — planned ]
-   Power BI Dashboard · KPI reporting · Data Quality dashboards
+```mermaid
+flowchart TD
+    A["SOURCE CSV FILES"] --> B["LANDING LAYER\nsl_online_retail / sl_offline_retail\nfile_fdw + src_*_raw + src_*"]
+    B --> C["MAPPING / LINEAGE LAYER (stg)\nmapping_* tables\nComposite surrogate keys\nrow_sig MD5 dedup\netl_batch_run / etl_step_run / etl_log / etl_file_registry"]
+    C --> D["NORMALIZED LAYER (Inmon - nf)\n3NF Snowflake\nnf_states → nf_cities → nf_addresses\nnf_customers / nf_stores / nf_products / nf_promotions / nf_deliveries / nf_engagements\nnf_employees_scd (SCD2) + nf_transactions"]
+    D --> E["DIMENSIONAL LAYER (Kimball - dim)\nStar schema dims + dim_dates\nfct_transactions_dd_dd (partitioned)"]
+    E --> F["ANALYTICS LAYER (planned)\nPower BI + KPI + DQ dashboards"]
 ```
 
-> 📌 *[VISUAL PLACEHOLDER — Full Architecture Diagram PNG: horizontal pipeline from CSV sources through all 4 schemas to Power BI, with schema names, row counts, and tool icons]*
+**Diagram above is GitHub-native Mermaid and replaces the previous image placeholder.**
 
 ---
 
 ## 5. Data Flow Diagram
 
-> 📌 *[VISUAL PLACEHOLDER — Data Flow Diagram PNG: shows how a single retail transaction moves from CSV row → frg_* foreign table → src_*_raw → src_* standardized → mapping_transactions (with row_sig) → nf_transactions (with FK resolution) → fct_transactions_dd_dd (with surrogate key join)]*
+```mermaid
+flowchart LR
+    A["CSV Row"] --> B["frg_* (file_fdw foreign table)"]
+    B --> C["src_*_raw"]
+    C --> D["src_* (standardized)"]
+    D --> E["stg.mapping_transactions\nrow_sig MD5 + source lineage"]
+    E --> F["nf.nf_transactions\nFK resolution to enterprise entities"]
+    F --> G["dim.fct_transactions_dd_dd\nSurrogate-key joins + partitions"]
+```
 
 ### Ingestion modes
 
@@ -145,7 +134,20 @@ In short, the platform is a **hybrid warehouse architecture** combining normaliz
 **Incremental load:**  
 Same master procedure — idempotency is guaranteed by `row_sig` deduplication on mapping_transactions and `NOT EXISTS` guards on all NF and DIM inserts. New rows are appended; existing rows are skipped or updated per SCD type.
 
-> 📌 *[VISUAL PLACEHOLDER — Incremental vs Bulk Load Flow Diagram PNG: two swimlane comparison showing what changes per mode]*
+```mermaid
+flowchart LR
+    subgraph BULK[Bulk Load]
+      B1[master_ingestion_load] --> B2[build_clean_staging]
+      B2 --> B3[master_full_load]
+      B3 --> B4[Full rebuild across mapping + nf + dim]
+    end
+
+    subgraph INC[Incremental Load]
+      I1[master_ingestion_load] --> I2[build_clean_staging]
+      I2 --> I3[master_full_load]
+      I3 --> I4[Idempotent merge\nrow_sig dedup + NOT EXISTS + SCD logic]
+    end
+```
 
 ---
 
@@ -165,7 +167,24 @@ Same master procedure — idempotency is guaranteed by `row_sig` deduplication o
 
 ### Snowflake Schema (nf layer — Inmon)
 
-> 📌 *[VISUAL PLACEHOLDER — Snowflake Schema ERD PNG: full entity-relationship diagram of nf schema showing all 13 tables, PK/FK relationships, and cardinalities. Tool suggestion: dbdiagram.io or pgAdmin ERD tool export]*
+```mermaid
+erDiagram
+    NF_STATES ||--o{ NF_CITIES : contains
+    NF_CITIES ||--o{ NF_ADDRESSES : contains
+    NF_ADDRESSES ||--o{ NF_CUSTOMERS : assigned_to
+    NF_ADDRESSES ||--o{ NF_STORES : located_at
+    NF_PRODUCT_CATEGORIES ||--o{ NF_PRODUCTS : classifies
+    NF_PROMOTION_TYPES ||--o{ NF_PROMOTIONS : classifies
+    NF_SHIPPING_PARTNERS ||--o{ NF_DELIVERIES : serves
+    NF_CUSTOMERS ||--o{ NF_TRANSACTIONS : used_in
+    NF_PRODUCTS ||--o{ NF_TRANSACTIONS : sold_in
+    NF_PROMOTIONS ||--o{ NF_TRANSACTIONS : applied_in
+    NF_DELIVERIES ||--o{ NF_TRANSACTIONS : delivered_in
+    NF_ENGAGEMENTS ||--o{ NF_TRANSACTIONS : attached_to
+    NF_STORES ||--o{ NF_TRANSACTIONS : sold_at
+    NF_CITIES ||--o{ NF_TRANSACTIONS : city_context
+    NF_EMPLOYEES_SCD ||--o{ NF_TRANSACTIONS : sold_by
+```
 
 Key FK chains in the snowflake schema:
 
@@ -192,7 +211,18 @@ nf_transactions → nf_customers, nf_products, nf_promotions,
 
 ### Star Schema (dim layer — Kimball)
 
-> 📌 *[VISUAL PLACEHOLDER — Star Schema ERD PNG: classic star diagram with fct_transactions_dd_dd at center, 7 dimension tables radiating outward, surrogate key joins shown]*
+```mermaid
+flowchart TB
+    F["fct_transactions_dd_dd"]
+    C[dim_customers] --> F
+    S[dim_stores] --> F
+    P[dim_products] --> F
+    PR[dim_promotions] --> F
+    D[dim_deliveries] --> F
+    E[dim_engagements] --> F
+    EMP[dim_employees_scd] --> F
+    DT[dim_dates] --> F
+```
 
 ---
 
@@ -233,57 +263,46 @@ nf_transactions → nf_customers, nf_products, nf_promotions,
 
 The pipeline is fully orchestrated via a hierarchy of PL/pgSQL stored procedures:
 
-```
-stg.master_ingestion_load()          ← Entry point for raw data load
-    ├── stg.load_raw_sources()
-    │       ├── stg.load_raw_offline()
-    │       └── stg.load_raw_online()
-    └── stg.build_clean_staging()
-            ├── stg.build_clean_offline()
-            └── stg.build_clean_online()
+```mermaid
+flowchart TD
+    A[stg.master_ingestion_load] --> A1[stg.load_raw_sources]
+    A1 --> A2[stg.load_raw_offline]
+    A1 --> A3[stg.load_raw_online]
+    A --> A4[stg.build_clean_staging]
+    A4 --> A5[stg.build_clean_offline]
+    A4 --> A6[stg.build_clean_online]
 
-stg.master_full_load()               ← Entry point for full DWH build
-    ├── stg.load_map_customers()
-    ├── stg.load_map_stores()
-    ├── stg.load_map_products()
-    ├── stg.load_map_promotions()
-    ├── stg.load_map_deliveries()
-    ├── stg.load_map_engagements()
-    ├── stg.load_map_employees()
-    ├── stg.load_map_transactions()
-    │
-    ├── stg.load_ce_states()
-    ├── stg.load_ce_cities()
-    ├── stg.load_ce_addresses()
-    ├── stg.load_ce_product_categories()
-    ├── stg.load_ce_promotion_types()
-    ├── stg.load_ce_shipping_partners()
-    │
-    ├── stg.load_ce_customers()        ← SCD Type 1
-    ├── stg.load_ce_stores()           ← SCD Type 0
-    ├── stg.load_ce_products()         ← SCD Type 1
-    ├── stg.load_ce_promotions()       ← SCD Type 0
-    ├── stg.load_ce_deliveries()       ← SCD Type 0
-    ├── stg.load_ce_engagements()      ← SCD Type 0
-    ├── stg.load_ce_employees_scd()    ← SCD Type 2
-    ├── stg.load_ce_transactions()
-    │
-    ├── stg.load_dim_customers()
-    ├── stg.load_dim_stores()
-    ├── stg.load_dim_products()
-    ├── stg.load_dim_promotions()
-    ├── stg.load_dim_deliveries()
-    ├── stg.load_dim_engagements()
-    ├── stg.load_dim_employees_scd()
-    ├── stg.load_dim_dates()
-    │
-    └── stg.master_transactions_monthly_load()
-            └── dim.load_fct_transactions_dd_by_month()  ← per month loop
+    B[stg.master_full_load] --> M[Mapping Loads: load_map_*]
+    M --> N[Normalized Loads: load_ce_*]
+    N --> D[Dim Loads: load_dim_*]
+    D --> F[stg.master_transactions_monthly_load]
+    F --> F2[dim.load_fct_transactions_dd_by_month]
 ```
 
 Every procedure call is logged to `stg.etl_log` via `stg.log_etl_event()`. Every batch is tracked in `stg.etl_batch_run` and `stg.etl_step_run`.
 
-> 📌 *[VISUAL PLACEHOLDER — Pipeline Orchestration Flow Diagram PNG: left-to-right swimlane with procedure names grouped by layer, showing call hierarchy and log events]*
+```mermaid
+flowchart LR
+    subgraph OBS[Observability]
+      L1[stg.log_etl_event]
+      L2[stg.etl_log]
+      L3[stg.etl_batch_run]
+      L4[stg.etl_step_run]
+    end
+
+    ING[Ingestion Procedures] --> MAP[Mapping Procedures]
+    MAP --> NF[NF Procedures]
+    NF --> DIM[DIM Procedures]
+    DIM --> FACT[Monthly Fact Loader]
+
+    ING --> L1
+    MAP --> L1
+    NF --> L1
+    DIM --> L1
+    L1 --> L2
+    L1 --> L3
+    L1 --> L4
+```
 
 ---
 
@@ -306,7 +325,12 @@ Slowly Changing Dimensions (SCD) define how changes in source data are handled i
 | `nf_products` | **Type 1** | Product attributes overwrite — stock levels update in place |
 | `nf_employees_scd` | **Type 2** | Salary and position changes must be historically tracked (each change creates a new version with `start_dt`, `end_dt`, `is_active`) |
 
-> 📌 *[VISUAL PLACEHOLDER — SCD Type 0/1/2 Comparison Diagram PNG: three-panel visual showing how each type handles a change event with before/after row examples]*
+```mermaid
+flowchart LR
+    T0["Type 0\nNo change allowed"] --> X0["Initial value kept forever"]
+    T1["Type 1\nOverwrite"] --> X1["Old value replaced\nNo history"]
+    T2["Type 2\nVersioning"] --> X2["Expire old row + insert new active row"]
+```
 
 ---
 
@@ -323,7 +347,16 @@ Slowly Changing Dimensions (SCD) define how changes in source data are handled i
 | **Accuracy** | Values reflect real-world truth | Synthetic dataset — business logic anomalies documented; pipeline correctness verified | 🔄 Test cases in progress |
 | **Timeliness** | Data is available within acceptable time windows | Batch timestamps tracked in `etl_batch_run`; `load_dts` and `insert_dt` on every row | ✓ Tracked; SLA not yet formalized |
 
-> 📌 *[VISUAL PLACEHOLDER — DQ Framework Diagram PNG: 6-cell grid with dimension name, icon, description, and traffic-light status per dimension]*
+```mermaid
+flowchart TB
+    DQ[Data Quality Framework]
+    DQ --> C1[Completeness ✓]
+    DQ --> C2[Uniqueness ✓]
+    DQ --> C3[Validity ✓]
+    DQ --> C4[Consistency ✓]
+    DQ --> C5[Accuracy 🔄]
+    DQ --> C6[Timeliness ✓]
+```
 
 ### Referential Integrity — Default Sentinel Row Pattern
 
@@ -488,13 +521,14 @@ retail-dw-pipeline/
 ├── ARCHITECTURE.md                  ← Detailed design decisions
 │
 ├── docs/
-│   ├── architecture_overview.png    ← [VISUAL PLACEHOLDER]
-│   ├── data_flow.png                ← [VISUAL PLACEHOLDER]
-│   ├── snowflake_schema_erd.png     ← [VISUAL PLACEHOLDER]
-│   ├── star_schema_erd.png          ← [VISUAL PLACEHOLDER]
-│   ├── pipeline_orchestration.png   ← [VISUAL PLACEHOLDER]
-│   ├── scd_comparison.png           ← [VISUAL PLACEHOLDER]
-│   └── dq_framework.png             ← [VISUAL PLACEHOLDER]
+│   ├── 01_architecture.md
+│   ├── 02_layer_design.md
+│   ├── 04_scd_strategy.md
+│   ├── 07_data_quality_framework.md
+│   └── images/
+│       ├── data_flow.png
+│       ├── orchestration_flow.png
+│       └── star_schema.png
 │
 ├── sql/
 │   ├── 00_setup/
