@@ -426,9 +426,9 @@ flowchart TB
 
 ## 13) AI Automation & Agentic Workflow Diagram (DWH-Centric)
 
-**Suggested PNG output:** `docs/architecture/13_ai_automation_agentic_workflow.png`
+**WORK IN PROGRESS:** 
 
-> Amaç: Mevcut DWH pipeline’ını (landing → mapping → nf → dim → reporting) bozmadan, bunun etrafına AI destekli karar verme, anomali yakalama, incident otomasyonu ve self-healing orkestrasyon katmanı eklemek.
+> Aim: Wrapping the existing DWH Pipeline (landing → mapping → nf → dim → reporting) up witth AI-native automation system design, which works with human (human--in-the-loop, hooks -preHook, postHook, guards .. etc), catching the anomalies, self-healing orchestration, strengthening built-in agents and task specific sub-agents.
 
 ```mermaid
 flowchart LR
