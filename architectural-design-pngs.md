@@ -380,9 +380,9 @@ flowchart TB
 ```mermaid
 flowchart LR
     subgraph S0[SCD Type 0 No Change]
-      A1[Before: store_id=10, store_city=Boston]
-      A2[Incoming: store_city=Chicago]
-      A3[After: unchanged row remains Boston]
+      A1[Before: promotion_id=10, promotion_channel=social_media]
+      A2[Incoming: promotion_channel=website]
+      A3[After: unchanged row remains social_media]
       A1 --> A2 --> A3
     end
 
@@ -394,10 +394,10 @@ flowchart LR
     end
 
     subgraph S2[SCD Type 2 History]
-      C1[Before: emp=E77, role=agent, is_current=Y]
-      C2[Incoming: role=lead_agent]
-      C3[Old row closed: is_current=N, valid_to=change_ts]
-      C4[New row inserted: is_current=Y, valid_from=change_ts]
+      C1[Before: employee_name=emp2, position=cashier, is_current=t]
+      C2[Incoming: position=manager]
+      C3[Old row closed: is_current=f, valid_to=observed_ts]
+      C4[New row inserted: is_current=t, valid_from=start_dt]
       C1 --> C2 --> C3 --> C4
     end
 ```
@@ -423,9 +423,3 @@ flowchart TB
 
 ---
 
-## PNG Production Notes
-
-- Mermaid kaynak kodları version-control dostudur; PNG export için Mermaid Live Editor / draw.io / CI renderer kullanın.
-- ERD diyagramlarında (özellikle #8 ve #9) cardinality etiketlerini pgAdmin ERD export ile zenginleştirmeniz tavsiye edilir.
-- Önerilen çıktı klasörü: `docs/architecture/`.
-- Bu doküman SQL procedure hiyerarşisi ve tablo ilişkileri ile uyumludur; özellikle `stg.master_ingestion_load()` ve `stg.master_full_load()` çağrı zincirleri baz alınmıştır.
