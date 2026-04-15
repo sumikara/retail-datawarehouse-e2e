@@ -8,7 +8,6 @@
 2. Full Architecture Diagram (Horizontal Pipeline)  
 3. Architecture in Pipeline (Flow Visual)  
 6. Pipeline Orchestration Flow Diagram  
-7. Incremental vs Bulk Load Flow Diagram  
 8. ERD Diagram (Whole SQL Landscape, Cross-Layer)  
 9. Snowflake Schema ERD (NF 3NF, 13 tables)  
 10. Star Schema Diagram (Dim/Kimball)  
@@ -198,36 +197,6 @@ flowchart LR
     F6 --> O1
 ```
 
----
-
-## 7) Incremental vs Bulk Load Flow Diagram (Two Swimlanes)
-
-**Suggested PNG output:** `docs/architecture/07_incremental_vs_bulk.png`
-
-```mermaid
-flowchart TB
-    subgraph BULK[Bulk Mode]
-      B1[Load complete CSV files]
-      B2[Recreate src_*_raw]
-      B3[Rebuild src_* standardized tables]
-      B4[Run all mapping procedures]
-      B5["Run full nf load reference and business entities"]
-      B6["Run full dim load + monthly fact generation"]
-      B1 --> B2 --> B3 --> B4 --> B5 --> B6
-    end
-
-    subgraph INCR[Incremental Mode]
-      I1[Load delta file / inc source]
-      I2[Append targeted raw data]
-      I3[Apply targeted clean rebuild or merge]
-      I4["Selective mapping refresh + row_sig dedupe"]
-      I5["NF upsert + SCD rules"]
-      I6["Dim upsert + affected month fact load"]
-      I1 --> I2 --> I3 --> I4 --> I5 --> I6
-    end
-```
-
----
 
 ## 8) ERD Diagram (Whole SQL Landscape, Cross-Layer)
 
