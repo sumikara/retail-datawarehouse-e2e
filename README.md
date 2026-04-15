@@ -29,7 +29,7 @@
 
 ## 1. Project Overview
 
-This project implements a production-grade **ELT (Extract → Load → Transform) data warehouse pipeline** using only PostgreSQL and PL/pgSQL — no third-party orchestration tool, no external transformation engine. All transformation logic lives inside the database engine itself.
+This project implements a production-grade, SQL-native **ELT (Extract → Load → Transform) data warehouse pipeline** using only PostgreSQL and PL/pgSQL — no third-party orchestration tool (YET), no external transformation engine. All transformation logic lives inside the database engine itself.
 
 The dataset consists of **two synthetic retail CSV files** (500,000 rows each): one representing online retail transactions, one representing offline (in-store) transactions. Both sources are transaction-grained — every row is one sales event.
 
