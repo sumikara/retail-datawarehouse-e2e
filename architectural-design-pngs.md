@@ -7,7 +7,6 @@
 1. Project Architecture Overview Diagram  
 2. Full Architecture Diagram (Horizontal Pipeline)  
 3. Architecture in Pipeline (Flow Visual)  
-5. Professional Architecture Diagram (Mapping-Focused)  
 6. Pipeline Orchestration Flow Diagram  
 7. Incremental vs Bulk Load Flow Diagram  
 8. ERD Diagram (Whole SQL Landscape, Cross-Layer)  
@@ -144,49 +143,7 @@ flowchart LR
     G --> H["Power BI"]
 ```
 
----
 
-
-## 5) Professional Architecture Diagram (Mapping-Focused)
-
-**Suggested PNG output:** `docs/architecture/05_mapping_focused_architecture.png`
-
-```mermaid
-flowchart LR
-    subgraph SRC[Staging Sources]
-      S1[sl_online_retail.src_online_retail]
-      S2[sl_offline_retail.src_offline_retail]
-      S3["src_offline_retail_employee_inc optional"]
-    end
-
-    subgraph MAP[Mapping Procedures + Tables]
-      P1[load_map_customers -> mapping_customers]
-      P2[load_map_stores -> mapping_stores]
-      P3[load_map_products -> mapping_products]
-      P4[load_map_promotions -> mapping_promotions]
-      P5[load_map_deliveries -> mapping_deliveries]
-      P6[load_map_engagements -> mapping_engagements]
-      P7[load_map_employees -> mapping_employees]
-      P8["load_map_transactions -> mapping_transactions row_sig"]
-    end
-
-    subgraph LOG[Observability]
-      L1[stg.log_etl_event]
-      L2[stg.etl_batch_run / stg.etl_step_run]
-    end
-
-    subgraph NF[NF Loaders]
-      N["load_ce_* procedures"]
-    end
-
-    S1 --> P1 & P3 & P4 & P5 & P6 & P8
-    S2 --> P1 & P2 & P3 & P4 & P5 & P7 & P8
-    S3 --> P7
-    P1 & P2 & P3 & P4 & P5 & P6 & P7 & P8 --> N
-    P1 & P2 & P3 & P4 & P5 & P6 & P7 & P8 --> L1 --> L2
-```
-
----
 
 ## 6) Pipeline Orchestration Flow Diagram (Swimlane + hierarchy + log)
 
