@@ -38,7 +38,7 @@ The pipeline ingests, standardizes, normalizes (Inmon), and then denormalizes (K
 - A **3NF Snowflake Schema** (`nf` schema) serving as the integration layer
 - A **Star Schema** (`dim` schema) serving as the analytics/reporting layer
 - A complete **orchestration and logging infrastructure** tracking every batch, step, and row count
-- A **mapping/lineage layer** (`stg` schema) preserving source keys and composite surrogate derivations
+- A **mapping/lineage layer** (`stg` schema) preserving source keys and composite derivations of them
 - **SCD Type 0, 1, and 2** strategies applied per entity based on business semantics
 - **Range partitioning** on the fact table, **BRIN and B-tree indexes** for query performance
 
@@ -104,7 +104,7 @@ In short, the platform is a **hybrid warehouse architecture** combining normaliz
 ```mermaid
 flowchart TD
     A["SOURCE CSV FILES"] --> B["LANDING LAYER\nsl_online_retail / sl_offline_retail\nfile_fdw + src_*_raw + src_*"]
-    B --> C["STAGING / LINEAGE LAYER (stg)\nmapping_* tables\nComposite surrogate keys\nrow_sig MD5 dedup\netl_batch_run / etl_step_run / etl_log / etl_file_registry"]
+    B --> C["STAGING / LINEAGE LAYER (stg)\nmapping_* tables\nComposed the columns \nrow_sig MD5 dedup\netl_batch_run / etl_step_run / etl_log / etl_file_registry"]
     C --> D["NORMALIZED LAYER (Inmon - nf)\n3NF Snowflake\nnf_states → nf_cities → nf_addresses\nnf_customers / nf_stores / nf_products / nf_promotions / nf_deliveries / nf_engagements\nnf_employees_scd (SCD2) + nf_transactions"]
     D --> E["DIMENSIONAL LAYER (Kimball - dim)\nStar schema dims + dim_dates\nfct_transactions_dd_dd (partitioned)"]
     E --> F["ANALYTICS LAYER (planned)\nPower BI + KPI + DQ dashboards"]
