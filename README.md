@@ -92,6 +92,8 @@ The answer is yes. And building it this way forces a deeper understanding of wha
 
 This project follows the **Hybrid Inmon-Kimball** architecture, also known as the **Corporate Information Factory (CIF)** model:
 
+In short, the platform is a **hybrid warehouse architecture** combining normalized integration with dimensional analytics.
+
 ```
 [ SOURCE CSV FILES ]
         │
