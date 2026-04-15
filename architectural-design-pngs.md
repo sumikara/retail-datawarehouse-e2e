@@ -16,7 +16,7 @@
 10. Star Schema Diagram (Dim/Kimball)  
 11. SCD Type 0 / Type 1 / Type 2 Comparison Diagram  
 12. DQ Framework Diagram (6-cell)
-13. AI Automation & Agentic Workflow Diagram (DWH-Centric)
+13. (In Progress..) AI Automation & Agentic Workflow Diagram (DWH-Centric)
 
 ---
 
