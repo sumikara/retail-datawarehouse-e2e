@@ -7,7 +7,6 @@
 1. Project Architecture Overview Diagram  
 2. Full Architecture Diagram (Horizontal Pipeline)  
 3. Architecture in Pipeline (Flow Visual)  
-4. Data Flow Diagram (Single Transaction Journey)  
 5. Professional Architecture Diagram (Mapping-Focused)  
 6. Pipeline Orchestration Flow Diagram  
 7. Incremental vs Bulk Load Flow Diagram  
@@ -147,24 +146,6 @@ flowchart LR
 
 ---
 
-## 4) Data Flow Diagram PNG (Single Transaction Journey)
-
-**Suggested PNG output:** `docs/architecture/04_data_flow_single_transaction.png`
-
-```mermaid
-flowchart LR
-    classDef tx fill:#E8F5E9,stroke:#2E7D32,color:#1B5E20;
-    classDef key fill:#FFF8E1,stroke:#F9A825,color:#6D4C41;
-
-    A[CSV transaction row]:::tx --> B[frg_online_retail / frg_offline_retail]:::tx
-    B --> C[src_online_retail_raw / src_offline_retail_raw]:::tx
-    C --> D[src_online_retail / src_offline_retail]:::tx
-    D --> E["mapping_transactions\nrow_sig md5 hash"]:::key
-    E --> F["nf_transactions\n8 FK resolution"]:::key
-    F --> G["fct_transactions_dd_dd\nsurrogate key joins"]:::key
-```
-
----
 
 ## 5) Professional Architecture Diagram (Mapping-Focused)
 
