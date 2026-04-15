@@ -140,7 +140,25 @@ In short, the platform is a **hybrid warehouse architecture** combining normaliz
    Power BI Dashboard · KPI reporting · Data Quality dashboards
 ```
 
-> 📌 <img width="3200" height="5200" alt="image" src="https://github.com/user-attachments/assets/3f7b3412-b0fc-49f8-a767-f62e81a02f32" />
+> 📌 # End-to-End Data Warehouse Flow (GitHub Friendly)
+
+> Aşağıdaki diyagram **Mermaid** formatındadır ve GitHub’da markdown içinde doğrudan render edilir.
+
+```mermaid
+flowchart TD
+    A["SOURCE CSV FILES"]
+
+    B["LANDING LAYER<br/>sl_online_retail / sl_offline_retail<br/><br/>• Foreign tables (file_fdw)<br/>• Raw tables (src_*_raw)<br/>• Standardized tables (src_*)"]
+
+    C["MAPPING / LINEAGE LAYER<br/>stg schema<br/><br/>• mapping_customers<br/>• mapping_products<br/>• mapping_promotions<br/>• mapping_deliveries<br/>• mapping_engagements<br/>• mapping_employees<br/>• mapping_transactions<br/><br/>• Composite surrogate key derivation<br/>• row_sig MD5 deduplication<br/>• ETL tables: etl_batch_run, etl_step_run, etl_log, etl_file_registry"]
+
+    D["NORMALIZED LAYER (Inmon)<br/>nf schema<br/><br/>• 3NF Snowflake:<br/>  nf_states → nf_cities → nf_addresses<br/>• nf_customers, nf_stores, nf_products<br/>• nf_promotions, nf_deliveries, nf_engagements<br/>• nf_employees_scd (SCD Type 2)<br/>• nf_transactions (integration fact)"]
+
+    E["DIMENSIONAL LAYER (Kimball)<br/>dim schema<br/><br/>• Star Schema dimensions:<br/>  dim_customers, dim_stores, dim_products, dim_promotions<br/>  dim_deliveries, dim_engagements, dim_employees_scd, dim_dates<br/>• fct_transactions_dd_dd (partitioned fact table)"]
+
+    F["ANALYTICS LAYER (planned)<br/><br/>• Power BI Dashboard<br/>• KPI reporting<br/>• Data Quality dashboards"]
+
+    A --> B --> C --> D --> E --> F
 
 
 ---
