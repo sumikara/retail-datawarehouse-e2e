@@ -16,6 +16,7 @@
 10. Star Schema Diagram (Dim/Kimball)  
 11. SCD Type 0 / Type 1 / Type 2 Comparison Diagram  
 12. DQ Framework Diagram (6-cell)
+13. AI Automation & Agentic Workflow Diagram (DWH-Centric)
 
 ---
 
@@ -423,3 +424,119 @@ flowchart TB
 
 ---
 
+## 13) AI Automation & Agentic Workflow Diagram (DWH-Centric)
+
+**Suggested PNG output:** `docs/architecture/13_ai_automation_agentic_workflow.png`
+
+> Amaç: Mevcut DWH pipeline’ını (landing → mapping → nf → dim → reporting) bozmadan, bunun etrafına AI destekli karar verme, anomali yakalama, incident otomasyonu ve self-healing orkestrasyon katmanı eklemek.
+
+```mermaid
+flowchart LR
+    classDef data fill:#E3F2FD,stroke:#1565C0,color:#0D47A1;
+    classDef dwh fill:#E8F5E9,stroke:#2E7D32,color:#1B5E20;
+    classDef ai fill:#F3E5F5,stroke:#8E24AA,color:#4A148C;
+    classDef ops fill:#FFF3E0,stroke:#EF6C00,color:#5D4037;
+    classDef gov fill:#FCE4EC,stroke:#C2185B,color:#880E4F;
+    classDef out fill:#E0F2F1,stroke:#00695C,color:#004D40;
+
+    subgraph SOURCES[Data Sources]
+      S1[Online + Offline CSV / API / ERP]:::data
+      S2[CRM + Campaign + Delivery feeds]:::data
+    end
+
+    subgraph DWH[Retail DWH Core Pipeline]
+      D1[Landing: frg_* / src_*_raw / src_*]:::dwh
+      D2[Mapping: stg.mapping_* + row_sig]:::dwh
+      D3[NF: nf_* integrated model]:::dwh
+      D4[Dimensional: dim_* + fct_transactions_dd_dd]:::dwh
+      D5[Reporting: Power BI / semantic views]:::dwh
+      D1 --> D2 --> D3 --> D4 --> D5
+    end
+
+    subgraph AIPLATFORM[AI Automation Platform]
+      A0[Feature & Context Builder\nfrom mapping, logs, DQ, KPI history]:::ai
+      A1[Agent Orchestrator\nplanner + tool router + memory]:::ai
+      A2[DQ & Drift Agent\nschema, freshness, null, outlier checks]:::ai
+      A3[Forecasting Agent\ndemand / promo uplift / stock risk]:::ai
+      A4[Root-Cause Agent\nlineage + SQL run logs + anomaly trace]:::ai
+      A5[Remediation Agent\nretry, backfill, rollback, ticket ops]:::ai
+      A6[NL Analytics Copilot\nbusiness Q&A over governed marts]:::ai
+      A0 --> A1
+      A1 --> A2 & A3 & A4 & A5 & A6
+    end
+
+    subgraph OPS[Operational Systems]
+      O1[Airflow / Dagster / dbt Cloud]:::ops
+      O2[Monitoring: Prometheus + Grafana]:::ops
+      O3[Incident: Slack / Teams / Jira]:::ops
+      O4[Model Registry + Experiment Tracking]:::ops
+    end
+
+    subgraph GOV[Governance & Security]
+      G1[Policy Engine: RLS, masking, PII tags]:::gov
+      G2[Audit Trail: agent action log + approval log]:::gov
+      G3[Human-in-the-loop approval gates]:::gov
+    end
+
+    subgraph OUT[Business Outcomes]
+      B1[Autonomous data quality triage]:::out
+      B2[Proactive pipeline healing]:::out
+      B3[Faster RCA + lower MTTR]:::out
+      B4[Forecast-driven planning]:::out
+      B5[Trusted self-service analytics]:::out
+    end
+
+    S1 --> D1
+    S2 --> D1
+
+    D2 --> A0
+    D4 --> A0
+    D5 --> A0
+    O1 --> A0
+    O2 --> A0
+
+    A2 --> O2
+    A4 --> O3
+    A5 --> O1
+    A5 --> O3
+    A3 --> O4
+    A6 --> D5
+
+    G1 --> A1
+    G2 --> A1
+    G3 --> A5
+
+    A2 --> B1
+    A5 --> B2
+    A4 --> B3
+    A3 --> B4
+    A6 --> B5
+```
+
+### Suggested Agentic Workflow (Execution Loop)
+
+```mermaid
+flowchart TD
+    T0[Trigger: schedule / event / anomaly alert] --> T1[Planner Agent creates run plan]
+    T1 --> T2[Context pull: lineage + ETL logs + DQ metrics + KPI deltas]
+    T2 --> T3{Decision policy check}
+    T3 -->|pass| T4[Specialist agents run in parallel]
+    T3 -->|fail| T9[Escalate to human approval]
+    T4 --> T5[DQ/Drift + Forecast + RCA outputs merged]
+    T5 --> T6{Action type}
+    T6 -->|safe auto-fix| T7[Remediation Agent executes retry/backfill]
+    T6 -->|risky/high-impact| T9
+    T7 --> T8[Post-check + regression guard + audit write]
+    T8 --> T10[Publish status to Slack/Jira + BI Ops dashboard]
+    T9 --> T11[Human decision: approve/reject/adjust]
+    T11 --> T7
+```
+
+### System Blueprint (How to build around this DWH)
+
+1. **Signals Layer:** `stg.log_etl_event`, batch/step logs, row counts, DQ scores, freshness SLA metrics.  
+2. **Agent Runtime Layer:** Planner + specialist agents (DQ, Forecast, RCA, Remediation, Copilot).  
+3. **Tooling Layer:** SQL runner, metadata/lineage reader, orchestration API, ticketing API, notification API.  
+4. **Policy Layer:** Auto-action thresholds, PII guardrails, approval workflows, rollback criteria.  
+5. **Learning Layer:** Incident outcome feedback + retraining cadence + prompt/version registry.  
+6. **Business Layer:** BI semantic model + conversational analytics + proactive planning outputs.
