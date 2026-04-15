@@ -32,12 +32,12 @@ flowchart LR
     classDef dim fill:#E0F2F1,stroke:#00695C,color:#004D40;
     classDef bi fill:#FCE4EC,stroke:#C2185B,color:#880E4F;
 
-    S[CSV Sources\nonline + offline\n~500K + ~500K rows]:::src
-    L[Landing\nsl_online_retail / sl_offline_retail\nfrg_* -> src_*_raw -> src_*]:::lnd
-    M[Mapping + Orchestration\nstg.mapping_* + stg.etl_*\nrow_sig lineage + log tables]:::map
-    N[NF / 3NF Integration\nnf.* (13 tables)]:::nf
-    D[Dimensional / Kimball\ndim.dim_* + dim.fct_transactions_dd_dd]:::dim
-    B[Power BI / Reporting]:::bi
+    S["CSV Sources\nonline + offline\n~500K + ~500K rows"]:::src
+    L["Landing\nsl_online_retail / sl_offline_retail\nfrg_* -> src_*_raw -> src_*"]:::lnd
+    M["Mapping + Orchestration\nstg.mapping_* + stg.etl_*\nrow_sig lineage + log tables"]:::map
+    N["NF / 3NF Integration\nnf 13 tables"]:::nf
+    D["Dimensional / Kimball\ndim.dim_* + dim.fct_transactions_dd_dd"]:::dim
+    B["Power BI / Reporting"]:::bi
 
     S --> L --> M --> N --> D --> B
 ```
@@ -72,7 +72,7 @@ flowchart LR
       M5[mapping_deliveries]
       M6[mapping_engagements]
       M7[mapping_employees]
-      M8[mapping_transactions\n(unique row_sig)]
+      M8["mapping_transactions\nunique row_sig"]
     end
 
     subgraph NF[03_normalized / nf]
@@ -92,7 +92,7 @@ flowchart LR
       D6[dim_engagements]
       D7[dim_employees_scd]
       D8[dim_dates]
-      FCT[fct_transactions_dd_dd\n(monthly partitions)]
+      FCT["fct_transactions_dd_dd\nmonthly partitions"]
     end
 
     subgraph BI[08_reporting]
@@ -135,13 +135,13 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    A[CSV Row] --> B[frg_* foreign table]
-    B --> C[src_*_raw]
-    C --> D[src_* standardized]
-    D --> E[stg.mapping_*]
-    E --> F[nf.* 3NF]
-    F --> G[dim.* + fct_transactions_dd_dd]
-    G --> H[Power BI]
+    A["CSV Row"] --> B["frg_* foreign table"]
+    B --> C["src_*_raw"]
+    C --> D["src_* standardized"]
+    D --> E["stg.mapping_*"]
+    E --> F["nf.* 3NF"]
+    F --> G["dim.* + fct_transactions_dd_dd"]
+    G --> H["Power BI"]
 ```
 
 ---
@@ -158,9 +158,9 @@ flowchart LR
     A[CSV transaction row]:::tx --> B[frg_online_retail / frg_offline_retail]:::tx
     B --> C[src_online_retail_raw / src_offline_retail_raw]:::tx
     C --> D[src_online_retail / src_offline_retail]:::tx
-    D --> E[mapping_transactions\nrow_sig = md5(...)]:::key
-    E --> F[nf_transactions\n8 FK resolution]:::key
-    F --> G[fct_transactions_dd_dd\nsurrogate key joins]:::key
+    D --> E["mapping_transactions\nrow_sig md5 hash"]:::key
+    E --> F["nf_transactions\n8 FK resolution"]:::key
+    F --> G["fct_transactions_dd_dd\nsurrogate key joins"]:::key
 ```
 
 ---
@@ -174,7 +174,7 @@ flowchart LR
     subgraph SRC[Staging Sources]
       S1[sl_online_retail.src_online_retail]
       S2[sl_offline_retail.src_offline_retail]
-      S3[src_offline_retail_employee_inc (optional)]
+      S3["src_offline_retail_employee_inc optional"]
     end
 
     subgraph MAP[Mapping Procedures + Tables]
@@ -185,7 +185,7 @@ flowchart LR
       P5[load_map_deliveries -> mapping_deliveries]
       P6[load_map_engagements -> mapping_engagements]
       P7[load_map_employees -> mapping_employees]
-      P8[load_map_transactions -> mapping_transactions (row_sig)]
+      P8["load_map_transactions -> mapping_transactions row_sig"]
     end
 
     subgraph LOG[Observability]
@@ -194,7 +194,7 @@ flowchart LR
     end
 
     subgraph NF[NF Loaders]
-      N[load_ce_* procedures]
+      N["load_ce_* procedures"]
     end
 
     S1 --> P1 & P3 & P4 & P5 & P6 & P8
@@ -213,23 +213,23 @@ flowchart LR
 ```mermaid
 flowchart LR
     subgraph INGESTION[Ingestion Lane]
-      I0[stg.master_ingestion_load()]
-      I1[stg.load_raw_sources()]
-      I2[stg.load_raw_offline()]
-      I3[stg.load_raw_online()]
-      I4[stg.build_clean_staging()]
-      I5[stg.build_clean_offline()]
-      I6[stg.build_clean_online()]
+      I0[stg.master_ingestion_load]
+      I1[stg.load_raw_sources]
+      I2[stg.load_raw_offline]
+      I3[stg.load_raw_online]
+      I4[stg.build_clean_staging]
+      I5[stg.build_clean_offline]
+      I6[stg.build_clean_online]
     end
 
     subgraph FULL[Full DWH Lane]
-      F0[stg.master_full_load()]
-      F1[load_map_customers/stores/products/promotions/deliveries/engagements/employees/transactions]
-      F2[load_ce_states/cities/addresses/product_categories/promotion_types/shipping_partners]
-      F3[load_ce_customers/stores/products/promotions/deliveries/engagements/employees_scd/transactions]
-      F4[load_dim_customers/stores/products/promotions/deliveries/engagements/employees_scd/dates]
-      F5[stg.master_transactions_monthly_load()]
-      F6[dim.load_fct_transactions_dd_by_month()]
+      F0[stg.master_full_load]
+      F1["load_map_customers/stores/products/promotions/deliveries/engagements/employees/transactions"]
+      F2["load_ce_states/cities/addresses/product_categories/promotion_types/shipping_partners"]
+      F3["load_ce_customers/stores/products/promotions/deliveries/engagements/employees_scd/transactions"]
+      F4["load_dim_customers/stores/products/promotions/deliveries/engagements/employees_scd/dates"]
+      F5[stg.master_transactions_monthly_load]
+      F6[dim.load_fct_transactions_dd_by_month]
     end
 
     subgraph OBS[Log Lane]
@@ -272,8 +272,8 @@ flowchart TB
       B2[Recreate src_*_raw]
       B3[Rebuild src_* standardized tables]
       B4[Run all mapping procedures]
-      B5[Run full nf load (reference + business entities)]
-      B6[Run full dim load + monthly fact generation]
+      B5["Run full nf load reference and business entities"]
+      B6["Run full dim load + monthly fact generation"]
       B1 --> B2 --> B3 --> B4 --> B5 --> B6
     end
 
@@ -281,9 +281,9 @@ flowchart TB
       I1[Load delta file / inc source]
       I2[Append targeted raw data]
       I3[Apply targeted clean rebuild or merge]
-      I4[Selective mapping refresh + row_sig dedupe]
-      I5[NF upsert + SCD rules]
-      I6[Dim upsert + affected month fact load]
+      I4["Selective mapping refresh + row_sig dedupe"]
+      I5["NF upsert + SCD rules"]
+      I6["Dim upsert + affected month fact load"]
       I1 --> I2 --> I3 --> I4 --> I5 --> I6
     end
 ```
@@ -379,21 +379,21 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    subgraph S0[SCD Type 0 (No Change)]
+    subgraph S0[SCD Type 0 No Change]
       A1[Before: store_id=10, store_city=Boston]
       A2[Incoming: store_city=Chicago]
       A3[After: unchanged row remains Boston]
       A1 --> A2 --> A3
     end
 
-    subgraph S1[SCD Type 1 (Overwrite)]
+    subgraph S1[SCD Type 1 Overwrite]
       B1[Before: customer_id=20, marital_status=single]
       B2[Incoming: marital_status=married]
       B3[After: same row updated to married]
       B1 --> B2 --> B3
     end
 
-    subgraph S2[SCD Type 2 (History)]
+    subgraph S2[SCD Type 2 History]
       C1[Before: emp=E77, role=agent, is_current=Y]
       C2[Incoming: role=lead_agent]
       C3[Old row closed: is_current=N, valid_to=change_ts]
@@ -410,12 +410,12 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    A[Completeness\n🟢 Required fields populated\nNull threshold checks]
-    B[Validity\n🟡 Type/domain/pattern rules\nDate & numeric format controls]
-    C[Uniqueness\n🟢 NK + row_sig duplicate tests\nDedup confidence]
-    D[Consistency\n🟡 Cross-layer reconciliation\nsource vs nf vs dim counts]
-    E[Timeliness\n🟢 SLA freshness checks\nload_dts monitoring]
-    F[Integrity\n🟢 PK/FK + SCD conformance\nUnknown (-1) fallback safety]
+    A["Completeness\n🟢 Required fields populated\nNull threshold checks"]
+    B["Validity\n🟡 Type/domain/pattern rules\nDate & numeric format controls"]
+    C["Uniqueness\n🟢 NK + row_sig duplicate tests\nDedup confidence"]
+    D["Consistency\n🟡 Cross-layer reconciliation\nsource vs nf vs dim counts"]
+    E["Timeliness\n🟢 SLA freshness checks\nload_dts monitoring"]
+    F["Integrity\n🟢 PK/FK + SCD conformance\nUnknown minus 1 fallback safety"]
 
     A --- B --- C
     D --- E --- F
