@@ -140,9 +140,7 @@ In short, the platform is a **hybrid warehouse architecture** combining normaliz
    Power BI Dashboard · KPI reporting · Data Quality dashboards
 ```
 
-> 📌 # End-to-End Data Warehouse Flow (GitHub Friendly)
-
-> Aşağıdaki diyagram **Mermaid** formatındadır ve GitHub’da markdown içinde doğrudan render edilir.
+> 📌 
 
 ```mermaid
 flowchart TD
@@ -159,7 +157,7 @@ flowchart TD
     F["ANALYTICS LAYER (planned)<br/><br/>• Power BI Dashboard<br/>• KPI reporting<br/>• Data Quality dashboards"]
 
     A --> B --> C --> D --> E --> F
-
+```
 
 ---
 
