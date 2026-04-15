@@ -25,17 +25,6 @@ flowchart TD
     E --> F[Dimensional Model / Data Marts]
 ```
 
-### Layer Responsibility by Stage
-
-| Layer | Main role | What it should do | What it should not do |
-|---|---|---|---|
-| `stg` | ingestion + cleansing control | raw load, standardization, type-safe parse, orchestration, ETL logging | final business entity resolution |
-| `mapping` | semantic alignment | source-to-target mapping, explicit rules, lineage, grain-safe handoff | premature dedup/survivorship |
-| `NF / 3NF` | entity resolution | key resolution, survivorship, business constraints, SCD behavior | raw-source parsing issues |
-| `dimensional` | analytics consumption | facts/dimensions, reporting models | raw-source interpretation |
-
----
-
 ## 3) Why the Mapping Layer Exists
 
 Clean staging by itself is not a business model.
@@ -49,7 +38,7 @@ This separation prevents business rules from being scattered inside NF loading S
 
 ---
 
-## 4) Input Assumptions from Staging (Code-backed)
+## 4) Input Assumptions from Staging (Code-backed) - MAPPING LAYER ONLY
 
 The following standardization patterns are already present in the `stg` layer before mapping:
 
