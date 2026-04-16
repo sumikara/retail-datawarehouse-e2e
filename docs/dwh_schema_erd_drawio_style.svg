@@ -1,0 +1,328 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3200" height="2200" viewBox="0 0 3200 2200">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#f3f4f6"/>
+    <stop offset="100%" stop-color="#e5e7eb"/>
+  </linearGradient>
+  <linearGradient id="g_blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#2563eb"/></linearGradient>
+  <linearGradient id="g_green" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/></linearGradient>
+  <linearGradient id="g_red" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fb7185"/><stop offset="100%" stop-color="#dc2626"/></linearGradient>
+  <linearGradient id="g_yellow" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde047"/><stop offset="100%" stop-color="#eab308"/></linearGradient>
+  <linearGradient id="g_orange" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+  <linearGradient id="g_purple" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+  <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+    <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/>
+  </filter>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L0,6 L9,3 z" fill="#cbd5e1"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="100%" height="100%" fill="url(#bg)"/>
+<text x="50" y="60" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="34" font-weight="700">DWH Schema ERD (Data Quality View)</text>
+<text x="50" y="95" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="18">Source → Landing → Mapping → NF → DIM/Fact (draw.io style boxed relationship diagram)</text>
+<rect x="120" y="160" width="2960" height="360" rx="24" fill="#0b1220" stroke="url(#g_purple)" stroke-width="2.5" opacity="0.95"/>
+<rect x="138" y="174" width="260" height="40" rx="12" fill="url(#g_purple)" filter="url(#shadow)"/>
+<text x="154" y="201" fill="#111111" font-size="20" font-family="Inter,Segoe UI,Arial" font-weight="700">DIM / FACT</text>
+<rect x="120" y="580" width="2960" height="360" rx="24" fill="#0b1220" stroke="url(#g_blue)" stroke-width="2.5" opacity="0.95"/>
+<rect x="138" y="594" width="260" height="40" rx="12" fill="url(#g_blue)" filter="url(#shadow)"/>
+<text x="154" y="621" fill="#111111" font-size="20" font-family="Inter,Segoe UI,Arial" font-weight="700">NF (3NF)</text>
+<rect x="120" y="1000" width="2960" height="360" rx="24" fill="#0b1220" stroke="url(#g_green)" stroke-width="2.5" opacity="0.95"/>
+<rect x="138" y="1014" width="260" height="40" rx="12" fill="url(#g_green)" filter="url(#shadow)"/>
+<text x="154" y="1041" fill="#111111" font-size="20" font-family="Inter,Segoe UI,Arial" font-weight="700">MAPPING</text>
+<rect x="120" y="1420" width="2960" height="300" rx="24" fill="#0b1220" stroke="url(#g_orange)" stroke-width="2.5" opacity="0.95"/>
+<rect x="138" y="1434" width="260" height="40" rx="12" fill="url(#g_orange)" filter="url(#shadow)"/>
+<text x="154" y="1461" fill="#111111" font-size="20" font-family="Inter,Segoe UI,Arial" font-weight="700">LANDING</text>
+<rect x="120" y="1780" width="2960" height="280" rx="24" fill="#0b1220" stroke="url(#g_red)" stroke-width="2.5" opacity="0.95"/>
+<rect x="138" y="1794" width="260" height="40" rx="12" fill="url(#g_red)" filter="url(#shadow)"/>
+<text x="154" y="1821" fill="#111111" font-size="20" font-family="Inter,Segoe UI,Arial" font-weight="700">SOURCE</text>
+<g filter="url(#shadow)"><rect x="300" y="1860" width="360" height="150" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="300" y="1860" width="360" height="36" rx="14" fill="url(#g_red)"/>
+<rect x="300" y="1888" width="360" height="8" fill="url(#g_red)"/>
+<text x="312" y="1884" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">ONLINE CSV</text>
+<text x="312" y="1912" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customers.csv</text>
+<text x="312" y="1930" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">products.csv</text>
+<text x="312" y="1948" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">sales.csv</text>
+<g filter="url(#shadow)"><rect x="760" y="1860" width="360" height="150" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="760" y="1860" width="360" height="36" rx="14" fill="url(#g_red)"/>
+<rect x="760" y="1888" width="360" height="8" fill="url(#g_red)"/>
+<text x="772" y="1884" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">OFFLINE CSV</text>
+<text x="772" y="1912" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customers.csv</text>
+<text x="772" y="1930" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">stores.csv</text>
+<text x="772" y="1948" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employees.csv</text>
+<text x="772" y="1966" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">sales.csv</text>
+<g filter="url(#shadow)"><rect x="280" y="1485" width="480" height="200" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="280" y="1485" width="480" height="36" rx="14" fill="url(#g_orange)"/>
+<rect x="280" y="1513" width="480" height="8" fill="url(#g_orange)"/>
+<text x="292" y="1509" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">sl_online_retail</text>
+<text x="292" y="1537" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">frg_online_retail</text>
+<text x="292" y="1555" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">src_online_retail_raw</text>
+<text x="292" y="1573" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">src_online_retail</text>
+<g filter="url(#shadow)"><rect x="860" y="1485" width="480" height="200" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="860" y="1485" width="480" height="36" rx="14" fill="url(#g_orange)"/>
+<rect x="860" y="1513" width="480" height="8" fill="url(#g_orange)"/>
+<text x="872" y="1509" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">sl_offline_retail</text>
+<text x="872" y="1537" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">frg_offline_retail</text>
+<text x="872" y="1555" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">src_offline_retail_raw</text>
+<text x="872" y="1573" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">src_offline_retail</text>
+<g filter="url(#shadow)"><rect x="220" y="1060" width="330" height="230" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="220" y="1060" width="330" height="36" rx="14" fill="url(#g_green)"/>
+<rect x="220" y="1088" width="330" height="8" fill="url(#g_green)"/>
+<text x="232" y="1084" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">stg.mapping_customers</text>
+<text x="232" y="1112" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_id_nk VARCHAR(20)</text>
+<text x="232" y="1130" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">gender VARCHAR(20)</text>
+<text x="232" y="1148" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">marital_status VARCHAR(20)</text>
+<text x="232" y="1166" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">birth_of_dt DATE</text>
+<text x="232" y="1184" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">membership_dt DATE</text>
+<text x="232" y="1202" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_src_id VARCHAR(255)</text>
+<text x="232" y="1220" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="580" y="1060" width="330" height="230" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="580" y="1060" width="330" height="36" rx="14" fill="url(#g_green)"/>
+<rect x="580" y="1088" width="330" height="8" fill="url(#g_green)"/>
+<text x="592" y="1084" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">stg.mapping_products</text>
+<text x="592" y="1112" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_id_nk VARCHAR(100)</text>
+<text x="592" y="1130" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_src_id VARCHAR(255)</text>
+<text x="592" y="1148" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_category VARCHAR(100)</text>
+<text x="592" y="1166" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_name VARCHAR(100)</text>
+<text x="592" y="1184" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_brand VARCHAR(100)</text>
+<text x="592" y="1202" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_stock INTEGER</text>
+<text x="592" y="1220" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="940" y="1060" width="330" height="230" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="940" y="1060" width="330" height="36" rx="14" fill="url(#g_green)"/>
+<rect x="940" y="1088" width="330" height="8" fill="url(#g_green)"/>
+<text x="952" y="1084" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">stg.mapping_promotions</text>
+<text x="952" y="1112" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_id_nk VARCHAR(100)</text>
+<text x="952" y="1130" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_type VARCHAR(100)</text>
+<text x="952" y="1148" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_channel VARCHAR(100)</text>
+<text x="952" y="1166" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_start_dt TIMESTAMP</text>
+<text x="952" y="1184" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_end_dt TIMESTAMP</text>
+<text x="952" y="1202" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_src_id VARCHAR(255)</text>
+<text x="952" y="1220" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="1300" y="1060" width="330" height="230" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="1300" y="1060" width="330" height="36" rx="14" fill="url(#g_green)"/>
+<rect x="1300" y="1088" width="330" height="8" fill="url(#g_green)"/>
+<text x="1312" y="1084" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">stg.mapping_deliveries</text>
+<text x="1312" y="1112" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_id_nk VARCHAR(100)</text>
+<text x="1312" y="1130" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_type VARCHAR(100)</text>
+<text x="1312" y="1148" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_status VARCHAR(100)</text>
+<text x="1312" y="1166" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">shipping_partner VARCHAR(100)</text>
+<text x="1312" y="1184" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_src_id VARCHAR(255)</text>
+<text x="1312" y="1202" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">source_system VARCHAR(100)</text>
+<text x="1312" y="1220" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="1660" y="1060" width="330" height="230" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="1660" y="1060" width="330" height="36" rx="14" fill="url(#g_green)"/>
+<rect x="1660" y="1088" width="330" height="8" fill="url(#g_green)"/>
+<text x="1672" y="1084" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">stg.mapping_transactions</text>
+<text x="1672" y="1112" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">transaction_id VARCHAR(100)</text>
+<text x="1672" y="1130" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">transaction_dt TIMESTAMP</text>
+<text x="1672" y="1148" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">total_sales NUMERIC(10,2)</text>
+<text x="1672" y="1166" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">quantity INTEGER</text>
+<text x="1672" y="1184" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">unit_price NUMERIC(10,2)</text>
+<text x="1672" y="1202" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">row_sig TEXT (UNIQUE)</text>
+<text x="1672" y="1220" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="2020" y="1060" width="330" height="230" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="2020" y="1060" width="330" height="36" rx="14" fill="url(#g_green)"/>
+<rect x="2020" y="1088" width="330" height="8" fill="url(#g_green)"/>
+<text x="2032" y="1084" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">stg.mapping_engagements</text>
+<text x="2032" y="1112" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">engagement_id_nk VARCHAR(100)</text>
+<text x="2032" y="1130" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">website_address VARCHAR(250)</text>
+<text x="2032" y="1148" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">order_channel VARCHAR(100)</text>
+<text x="2032" y="1166" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">issue_status VARCHAR(100)</text>
+<text x="2032" y="1184" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">website_visits INTEGER</text>
+<text x="2032" y="1202" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">social_media_engagement VARCHAR(100)</text>
+<text x="2032" y="1220" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="2380" y="1060" width="330" height="230" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="2380" y="1060" width="330" height="36" rx="14" fill="url(#g_green)"/>
+<rect x="2380" y="1088" width="330" height="8" fill="url(#g_green)"/>
+<text x="2392" y="1084" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">stg.mapping_employees</text>
+<text x="2392" y="1112" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_src_id VARCHAR(100) NOT NULL</text>
+<text x="2392" y="1130" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_name_nk VARCHAR(100)</text>
+<text x="2392" y="1148" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_position VARCHAR(100)</text>
+<text x="2392" y="1166" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_salary NUMERIC(10,2)</text>
+<text x="2392" y="1184" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_hire_date DATE</text>
+<text x="2392" y="1202" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">observed_ts TIMESTAMP</text>
+<text x="2392" y="1220" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="220" y="640" width="300" height="250" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="220" y="640" width="300" height="36" rx="14" fill="url(#g_blue)"/>
+<rect x="220" y="668" width="300" height="8" fill="url(#g_blue)"/>
+<text x="232" y="664" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">nf.nf_states</text>
+<text x="232" y="692" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">state_id BIGINT PK</text>
+<text x="232" y="710" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">state_src_id VARCHAR(100) UNIQUE</text>
+<text x="232" y="728" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">state_name VARCHAR(100)</text>
+<text x="232" y="746" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="540" y="640" width="300" height="250" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="540" y="640" width="300" height="36" rx="14" fill="url(#g_blue)"/>
+<rect x="540" y="668" width="300" height="8" fill="url(#g_blue)"/>
+<text x="552" y="664" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">nf.nf_cities</text>
+<text x="552" y="692" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">city_id BIGINT PK</text>
+<text x="552" y="710" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">city_src_id VARCHAR(150) UNIQUE</text>
+<text x="552" y="728" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">state_id BIGINT FK</text>
+<text x="552" y="746" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="860" y="640" width="300" height="250" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="860" y="640" width="300" height="36" rx="14" fill="url(#g_blue)"/>
+<rect x="860" y="668" width="300" height="8" fill="url(#g_blue)"/>
+<text x="872" y="664" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">nf.nf_addresses</text>
+<text x="872" y="692" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">address_id BIGINT PK</text>
+<text x="872" y="710" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">address_src_id VARCHAR(200) UNIQUE</text>
+<text x="872" y="728" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">city_id BIGINT FK</text>
+<text x="872" y="746" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">zip_code VARCHAR(30)</text>
+<g filter="url(#shadow)"><rect x="1180" y="640" width="320" height="250" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="1180" y="640" width="320" height="36" rx="14" fill="url(#g_blue)"/>
+<rect x="1180" y="668" width="320" height="8" fill="url(#g_blue)"/>
+<text x="1192" y="664" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">nf.nf_customers</text>
+<text x="1192" y="692" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_id BIGINT PK</text>
+<text x="1192" y="710" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_src_id VARCHAR(255) UNIQUE</text>
+<text x="1192" y="728" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_id_nk VARCHAR(100)</text>
+<text x="1192" y="746" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">address_id BIGINT FK</text>
+<text x="1192" y="764" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">gender VARCHAR(20)</text>
+<text x="1192" y="782" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">marital_status VARCHAR(20)</text>
+<text x="1192" y="800" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">update_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="1520" y="640" width="320" height="250" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="1520" y="640" width="320" height="36" rx="14" fill="url(#g_blue)"/>
+<rect x="1520" y="668" width="320" height="8" fill="url(#g_blue)"/>
+<text x="1532" y="664" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">nf.nf_products</text>
+<text x="1532" y="692" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_id BIGINT PK</text>
+<text x="1532" y="710" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_src_id VARCHAR(255) UNIQUE</text>
+<text x="1532" y="728" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_category_id BIGINT FK</text>
+<text x="1532" y="746" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_name VARCHAR(100)</text>
+<text x="1532" y="764" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_brand VARCHAR(100)</text>
+<text x="1532" y="782" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_material VARCHAR(100)</text>
+<text x="1532" y="800" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">update_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="1860" y="640" width="320" height="250" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="1860" y="640" width="320" height="36" rx="14" fill="url(#g_blue)"/>
+<rect x="1860" y="668" width="320" height="8" fill="url(#g_blue)"/>
+<text x="1872" y="664" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">nf.nf_promotions</text>
+<text x="1872" y="692" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_id BIGINT PK</text>
+<text x="1872" y="710" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_src_id VARCHAR(255) UNIQUE</text>
+<text x="1872" y="728" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_type_id BIGINT FK</text>
+<text x="1872" y="746" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_channel VARCHAR(100)</text>
+<text x="1872" y="764" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_start_dt TIMESTAMP</text>
+<text x="1872" y="782" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_end_dt TIMESTAMP</text>
+<text x="1872" y="800" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="2200" y="640" width="320" height="250" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="2200" y="640" width="320" height="36" rx="14" fill="url(#g_blue)"/>
+<rect x="2200" y="668" width="320" height="8" fill="url(#g_blue)"/>
+<text x="2212" y="664" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">nf.nf_deliveries</text>
+<text x="2212" y="692" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_id BIGINT PK</text>
+<text x="2212" y="710" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_src_id VARCHAR(255) UNIQUE</text>
+<text x="2212" y="728" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">shipping_partner_id BIGINT FK</text>
+<text x="2212" y="746" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_type VARCHAR(100)</text>
+<text x="2212" y="764" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_status VARCHAR(100)</text>
+<text x="2212" y="782" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">source_system VARCHAR(100)</text>
+<text x="2212" y="800" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="2540" y="640" width="320" height="250" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="2540" y="640" width="320" height="36" rx="14" fill="url(#g_blue)"/>
+<rect x="2540" y="668" width="320" height="8" fill="url(#g_blue)"/>
+<text x="2552" y="664" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">nf.nf_transactions</text>
+<text x="2552" y="692" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">transaction_id VARCHAR(100)</text>
+<text x="2552" y="710" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">transaction_dt TIMESTAMP</text>
+<text x="2552" y="728" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_id BIGINT FK</text>
+<text x="2552" y="746" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_id BIGINT FK</text>
+<text x="2552" y="764" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_id BIGINT FK</text>
+<text x="2552" y="782" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_id BIGINT FK</text>
+<text x="2552" y="800" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">row_sig TEXT UNIQUE</text>
+<g filter="url(#shadow)"><rect x="220" y="220" width="300" height="240" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="220" y="220" width="300" height="36" rx="14" fill="url(#g_purple)"/>
+<rect x="220" y="248" width="300" height="8" fill="url(#g_purple)"/>
+<text x="232" y="244" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">dim.dim_customers</text>
+<text x="232" y="272" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_surr_id BIGINT PK</text>
+<text x="232" y="290" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_src_id BIGINT NOT NULL</text>
+<text x="232" y="308" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">gender VARCHAR(20)</text>
+<text x="232" y="326" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">marital_status VARCHAR(20)</text>
+<text x="232" y="344" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_city VARCHAR(100)</text>
+<text x="232" y="362" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_state VARCHAR(100)</text>
+<text x="232" y="380" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">update_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="540" y="220" width="300" height="240" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="540" y="220" width="300" height="36" rx="14" fill="url(#g_purple)"/>
+<rect x="540" y="248" width="300" height="8" fill="url(#g_purple)"/>
+<text x="552" y="244" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">dim.dim_products</text>
+<text x="552" y="272" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_surr_id BIGINT PK</text>
+<text x="552" y="290" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_src_id BIGINT NOT NULL</text>
+<text x="552" y="308" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_category VARCHAR(100)</text>
+<text x="552" y="326" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_name VARCHAR(100)</text>
+<text x="552" y="344" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_brand VARCHAR(100)</text>
+<text x="552" y="362" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_material VARCHAR(100)</text>
+<text x="552" y="380" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">update_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="860" y="220" width="300" height="240" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="860" y="220" width="300" height="36" rx="14" fill="url(#g_purple)"/>
+<rect x="860" y="248" width="300" height="8" fill="url(#g_purple)"/>
+<text x="872" y="244" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">dim.dim_promotions</text>
+<text x="872" y="272" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_surr_id BIGINT PK</text>
+<text x="872" y="290" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_src_id BIGINT NOT NULL</text>
+<text x="872" y="308" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_channel VARCHAR(100)</text>
+<text x="872" y="326" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_type VARCHAR(100)</text>
+<text x="872" y="344" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_start_dt TIMESTAMP</text>
+<text x="872" y="362" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_end_dt TIMESTAMP</text>
+<text x="872" y="380" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">update_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="1180" y="220" width="300" height="240" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="1180" y="220" width="300" height="36" rx="14" fill="url(#g_purple)"/>
+<rect x="1180" y="248" width="300" height="8" fill="url(#g_purple)"/>
+<text x="1192" y="244" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">dim.dim_deliveries</text>
+<text x="1192" y="272" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_surr_id BIGINT PK</text>
+<text x="1192" y="290" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_src_id BIGINT NOT NULL</text>
+<text x="1192" y="308" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_type VARCHAR(100)</text>
+<text x="1192" y="326" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_status VARCHAR(100)</text>
+<text x="1192" y="344" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">shipping_partner VARCHAR(100)</text>
+<text x="1192" y="362" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">insert_dt TIMESTAMP</text>
+<text x="1192" y="380" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">update_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="1500" y="220" width="300" height="240" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="1500" y="220" width="300" height="36" rx="14" fill="url(#g_purple)"/>
+<rect x="1500" y="248" width="300" height="8" fill="url(#g_purple)"/>
+<text x="1512" y="244" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">dim.dim_engagements</text>
+<text x="1512" y="272" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">engagement_surr_id BIGINT PK</text>
+<text x="1512" y="290" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">engagement_src_id BIGINT NOT NULL</text>
+<text x="1512" y="308" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">website_address VARCHAR(250)</text>
+<text x="1512" y="326" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">order_channel VARCHAR(100)</text>
+<text x="1512" y="344" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">issue_status VARCHAR(100)</text>
+<text x="1512" y="362" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">social_media_engagement VARCHAR(100)</text>
+<text x="1512" y="380" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">update_dt TIMESTAMP</text>
+<g filter="url(#shadow)"><rect x="1820" y="220" width="300" height="240" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="1820" y="220" width="300" height="36" rx="14" fill="url(#g_purple)"/>
+<rect x="1820" y="248" width="300" height="8" fill="url(#g_purple)"/>
+<text x="1832" y="244" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">dim.dim_employees_scd</text>
+<text x="1832" y="272" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_surr_id BIGINT PK</text>
+<text x="1832" y="290" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_src_id VARCHAR(255)</text>
+<text x="1832" y="308" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">start_dt TIMESTAMP</text>
+<text x="1832" y="326" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">end_dt TIMESTAMP</text>
+<text x="1832" y="344" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">is_active BOOLEAN</text>
+<text x="1832" y="362" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_position VARCHAR(100)</text>
+<text x="1832" y="380" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">employee_salary NUMERIC(10,2)</text>
+<g filter="url(#shadow)"><rect x="2140" y="220" width="300" height="240" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="2140" y="220" width="300" height="36" rx="14" fill="url(#g_purple)"/>
+<rect x="2140" y="248" width="300" height="8" fill="url(#g_purple)"/>
+<text x="2152" y="244" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">dim.dim_dates</text>
+<text x="2152" y="272" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">date_surr_id BIGINT PK</text>
+<text x="2152" y="290" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">full_date DATE UNIQUE</text>
+<text x="2152" y="308" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">day_of_month INTEGER</text>
+<text x="2152" y="326" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">month_of_year INTEGER</text>
+<text x="2152" y="344" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">year_of_date INTEGER</text>
+<text x="2152" y="362" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">week_of_year INTEGER</text>
+<text x="2152" y="380" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">is_weekend BOOLEAN</text>
+<g filter="url(#shadow)"><rect x="2460" y="220" width="620" height="300" rx="14" fill="#111827" stroke="#334155"/></g>
+<rect x="2460" y="220" width="620" height="36" rx="14" fill="url(#g_yellow)"/>
+<rect x="2460" y="248" width="620" height="8" fill="url(#g_yellow)"/>
+<text x="2472" y="244" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="15" font-weight="700">dim.fct_transactions_dd_dd</text>
+<text x="2472" y="272" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">transaction_src_id VARCHAR(100)</text>
+<text x="2472" y="290" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">transaction_date DATE</text>
+<text x="2472" y="308" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">product_surr_id BIGINT FK</text>
+<text x="2472" y="326" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">promotion_surr_id BIGINT FK</text>
+<text x="2472" y="344" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">delivery_surr_id BIGINT FK</text>
+<text x="2472" y="362" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">store_surr_id BIGINT FK</text>
+<text x="2472" y="380" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">customer_surr_id BIGINT FK</text>
+<text x="2472" y="398" fill="#111111" font-family="JetBrains Mono,Consolas,monospace" font-size="12">…</text>
+<line x1="480" y1="1860" x2="520" y2="1685" stroke="#fca5a5" stroke-width="2.5" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="940" y1="1860" x2="1050" y2="1685" stroke="#fca5a5" stroke-width="2.5" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="520" y1="1485" x2="430" y2="1290" stroke="#fdba74" stroke-width="2.5" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="1100" y1="1485" x2="1760" y2="1290" stroke="#fdba74" stroke-width="2.5" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="430" y1="1060" x2="1020" y2="890" stroke="#86efac" stroke-width="2.5" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="1760" y1="1060" x2="2700" y2="890" stroke="#86efac" stroke-width="2.5" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="1020" y1="640" x2="380" y2="460" stroke="#93c5fd" stroke-width="2.5" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="2700" y1="640" x2="2750" y2="520" stroke="#93c5fd" stroke-width="2.5" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="370" y1="460" x2="2540" y2="370" stroke="#fde047" stroke-width="2" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="690" y1="460" x2="2540" y2="370" stroke="#fde047" stroke-width="2" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="1010" y1="460" x2="2540" y2="370" stroke="#fde047" stroke-width="2" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="1330" y1="460" x2="2540" y2="370" stroke="#fde047" stroke-width="2" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="1650" y1="460" x2="2540" y2="370" stroke="#fde047" stroke-width="2" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="1970" y1="460" x2="2540" y2="370" stroke="#fde047" stroke-width="2" marker-end="url(#arrow)" opacity="0.9"/>
+<line x1="2290" y1="460" x2="2540" y2="370" stroke="#fde047" stroke-width="2" marker-end="url(#arrow)" opacity="0.9"/>
+<text x="2480" y="2050" fill="#111111" font-family="Inter,Segoe UI,Arial" font-size="14">Generated from repo SQL schema for Data Quality ERD review.</text>
+</svg>
