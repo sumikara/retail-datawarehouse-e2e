@@ -1,6 +1,8 @@
 # Retail Data Warehouse Pipeline
 ### A SQL-Native, End-to-End ELT Data Warehouse — Built on PostgreSQL in Google Colab
 
+This repo documents the core engineering principles that guide the design, development, and evolution of a production-oriented, SQL-heavy(PostgreSQL + PL/pgSQL) ELT (Extract → Load → Transform) Retail Data Warehouse implementation . These principles ensure that the warehouse remains reliable, scalable, maintainable, and production-ready.
+
 > **Status:** Active development · Bulk load complete · Incremental load tested · Data quality layer in progress  
 > **Stack:** PostgreSQL 14 · PL/pgSQL · Google Colab · file_fdw · Python (setup only)  
 > **Architecture:** Hybrid Inmon-Kimball (Corporate Information Factory model)
@@ -11,42 +13,45 @@
 
 1. [Project Overview](#1-project-overview)
 2. [Why This Project Exists](#2-why-this-project-exists)
-3. [Key Concepts](#3-key-concepts)
+3. [Core Engineering Principles](#3-key-concepts)
 4. [Architecture Overview](#4-architecture-overview)
 5. [Data Flow Diagram](#5-data-flow-diagram)
 6. [Layer Responsibilities](#6-layer-responsibilities)
-7. [Entity-Relationship Diagrams](#7-entity-relationship-diagrams)
-8. [Star Schema & Bus Matrix](#8-star-schema--bus-matrix)
-9. [Pipeline Orchestration Flow](#9-pipeline-orchestration-flow)
-10. [SCD Strategy by Entity](#10-scd-strategy-by-entity)
-11. [Data Quality & Governance Framework](#11-data-quality--governance-framework)
-12. [Design Decisions](#12-design-decisions)
-13. [Project Roadmap](#13-project-roadmap)
-14. [How to Run](#14-how-to-run)
-15. [Repository Structure](#15-repository-structure)
+7. [Key Strategy, Lineage, and Deduplication](#6-key-strategy-lineage-and-deduplication)
+8. [Entity-Relationship Diagrams](#7-entity-relationship-diagrams)
+9. [Star Schema & Bus Matrix](#8-star-schema--bus-matrix)
+10. [Pipeline Orchestration, Logging, and Batch Logic Flow](#9-pipeline-orchestration-flow)
+11. [SCD Strategy by Entity](#10-scd-strategy-by-entity)
+12. [Data Quality&Governance, Integrity, and Join Strategy ](#11-data-quality--governance-framework)
+13. [Performance and Indexing Strategy](#12-performance-and-indexing-strategy)
+14. [Design Decisions](#12-design-decisions)
+15. [Project Roadmap](#13-project-roadmap)
+16. [How to Run](#14-how-to-run)
+17. [Repository Structure](#15-repository-structure)
 
 ---
 
 ## 1. Project Overview
 
-This project implements a production-grade, SQL-native **ELT (Extract → Load → Transform) data warehouse pipeline** using only PostgreSQL and PL/pgSQL — no third-party orchestration tool (YET), no external transformation engine. All transformation logic lives inside the database engine itself.
+This project implements a production-grade, SQL-native ELT data warehouse pipeline using PostgreSQL and PL/pgSQL only. All business transformation logic is handled inside the database engine, not in the BI layer and not in an external transformation framework. This keeps the warehouse as the single source of truth and makes transformation logic auditable, rerunnable, and reusable.
 
 The dataset consists of **two synthetic retail CSV files** (500,000 rows each): one representing online retail transactions, one representing offline (in-store) transactions. Both sources are transaction-grained — every row is one sales event.
 
-The pipeline ingests, standardizes, normalizes (Inmon), and then denormalizes (Kimball) this data into a fully operational data warehouse with:
-
-- A **3NF Snowflake Schema** (`nf` schema) serving as the integration layer
-- A **Star Schema** (`dim` schema) serving as the analytics/reporting layer
-- A complete **orchestration and logging infrastructure** tracking every batch, step, and row count
-- A **mapping/lineage layer** (`stg` schema) preserving source keys and composite derivations of them
-- **SCD Type 0, 1, and 2** strategies applied per entity based on business semantics
-- **Range partitioning** on the fact table, **BRIN and B-tree indexes** for query performance
+The pipeline includes:
+- **Source-specific landing schemas** for raw ingestion and standardization
+- A **mapping / lineage layer** for source triplet preservation, business-key handling, composite key derivation, and low-cost downstream joins
+- A **3NF normalized layer** as the integrated enterprise warehouse
+- A **star schema** for analytics and reporting
+- A **logging and orchestration framework** for ETL observability
+- **SCD Type 0, 1, and 2** handling based on entity semantics
+- **Default row strategy, referential integrity preservation,** and **incremental-safe reruns**
+- **Partitioning and indexing strategy** for scalable query performance
 
 ```mermaid
 flowchart LR
     A["Source CSV Files\nOnline + Offline"] --> B["Landing Layer\nsl_online_retail / sl_offline_retail"]
     B --> C["Mapping & Lineage (stg)\nComposite keys + row_sig MD5 + ETL metadata"]
-    C --> D["Normalized Layer (nf)\n3NF Snowflake + Integration Fact"]
+    C --> D["Normalized Layer (nf)\n3NF Snowflake + Integration Pre-Fact"]
     D --> E["Dimensional Layer (dim)\nStar Schema + Partitioned Fact"]
     E --> F["Analytics Layer (Planned)\nPower BI + KPI + DQ Dashboards"]
 ```
@@ -55,60 +60,64 @@ flowchart LR
 
 ## 2. Why This Project Exists
 
-Most data engineering tutorials skip the hard parts: entity resolution, composite key derivation, SCD versioning, referential integrity enforcement, and orchestration metadata. This project was built to answer the question:
+Many data warehouse tutorials show final tables but skip the hard parts that make enterprise pipelines reliable: source lineage, natural key ambiguity, row-level deduplication, referential integrity, SCD handling, rerunnable scripts, logging, and performance-aware join design. This project was built to make those decisions explicit.
 
-**"Can a full enterprise-grade DWH pipeline be designed and executed using only SQL — without dbt, Airflow, or a cloud warehouse?"**
-
-The answer is yes. And building it this way forces a deeper understanding of what tools like dbt, Snowflake, and Airflow are actually abstracting away.
-
-**Infrastructure constraint as a design driver:** Because the development environment is Google Colab (no persistent local PostgreSQL, no DBeaver, no VS Code), the entire pipeline was engineered to run inside a Colab notebook — including a self-contained PostgreSQL 14 cluster installed via `apt-get`, and CSV data loaded using PostgreSQL's native `file_fdw` extension (foreign data wrapper). This made `file_fdw` act as the ingestion interface instead of `\COPY` or external loaders, which is an unusual but fully valid production pattern for file-based ingestion.
+**Building it this way forces a deeper understanding of what tools like dbt, Snowflake, and Airflow are actually abstracting away.**
 
 ---
 
-## 3. Key Concepts
+## 3. Core Engineering Principles
 
-| Term | Definition | Used in This Project |
-|---|---|---|
-| **ELT** | Extract → Load → Transform. Data lands raw first; all transformation happens inside the target DB engine. | Full pipeline pattern. Raw CSV → PostgreSQL → transformation in PL/pgSQL |
-| **ETL** | Extract → Transform → Load. Transformation happens outside the DB before loading. | Not used here — distinguished intentionally |
-| **file_fdw** | PostgreSQL foreign data wrapper that maps a CSV file to a virtual table (foreign table) queryable with SQL. | Used to ingest online and offline CSV files as `frg_online_retail` and `frg_offline_retail` |
-| **Staging Layer** | A landing zone that holds raw + standardized source data before business logic is applied. | `sl_online_retail` and `sl_offline_retail` schemas |
-| **Data Integration** | Combining data from multiple source systems into a unified structure. | UNION ALL of online and offline sources in mapping procedures |
-| **Source Key (NK)** | The natural key from the source system (e.g. `customer_id` from the CSV). Also called Natural Key. | Stored as `*_id_nk` in mapping tables |
-| **Composite Key** | A surrogate key derived by concatenating multiple attributes where no single reliable NK exists. | `customer_src_id = gender + marital_status + dob + zip + city + state` |
-| **Surrogate Key** | A system-generated integer key used as the primary key in normalized and dimensional layers. | All `nf.*` and `dim.*` tables use BIGINT surrogates via sequences |
-| **SCD Type 0** | Fixed — once loaded, values never change. | `nf_stores`, `nf_deliveries`, `nf_promotions` |
-| **SCD Type 1** | Overwrite — new values replace old values. No history kept. | `nf_customers`, `nf_products` |
-| **SCD Type 2** | Versioning — each change creates a new row with `start_dt`, `end_dt`, `is_active`. History is preserved. | `nf_employees_scd`, `dim_employees_scd` |
-| **3NF (Snowflake Schema)** | Third Normal Form. Each table stores facts about one entity only; related data is in separate tables joined by FK. | `nf` schema — 13 tables with FK hierarchy |
-| **Star Schema** | Denormalized dimensional model. Dimension attributes are flattened into wide tables around a central fact. | `dim` schema — 7 dimensions + 1 partitioned fact table |
-| **Inmon CIF** | Corporate Information Factory. Bill Inmon's methodology: build a normalized enterprise DWH first, then derive data marts. | `nf` schema mirrors the CIF integration layer |
-| **Hybrid Inmon-Kimball** | Architecture that maintains both a 3NF integration layer (Inmon) and Star Schema data mart (Kimball). | Exact architecture of this project |
-| **Data Profiling** | Statistical analysis of source data to understand distribution, nullability, uniqueness, and grain. | Performed post-standardization to validate entity grain |
-| **Data Quality (DQ)** | Fitness of data for its intended use, measured across 6 dimensions. | DQ framework defined — test implementation in progress |
-| **Data Governance** | Policies, roles, and controls that ensure data is managed responsibly. | GRANT/REVOKE role-based access control defined; audit log table created |
-| **MD5 Row Signature** | An MD5 hash of key fields used as a duplicate-detection fingerprint for transaction rows. | `row_sig = MD5(source_system || transaction_id || customer_id || product_id || ...)` |
-| **Referential Integrity** | All foreign key references point to a real row — no orphan records. | Default (-1) sentinel rows inserted in all dimension/reference tables before fact load |
-| **Range Partitioning** | Splitting a large table by a range of values (e.g. date) so queries only scan relevant partitions. | `fct_transactions_dd_dd` partitioned by `transaction_date` monthly |
-| **BRIN Index** | Block Range INdex. Lightweight index for ordered columns in large tables (e.g. dates). | Applied to `transaction_dt` on fact table for time-range query acceleration |
-| **Bus Matrix** | A Kimball artifact showing which dimensions participate in which business processes. | See Section 8 |
+** Rerunnable by design**
 
----
+All SQL objects and procedures are written to be safely executed multiple times. This is implemented through patterns such as:
+
+`CREATE ... IF NOT EXISTS`
+controlled `DROP ... IF EXISTS`
+`TRUNCATE + INSERT` for snapshot-style bulk loads
+`WHERE NOT EXISTS`, `LEFT JOIN ... IS NULL`, and `ON CONFLICT DO NOTHING` for incremental-safe inserts
+
+The goal is simple: the pipeline must not require manual cleanup before being executed again. This reduces duplication, lowers operational risk, and makes testing idempotency measurable.
+
+**Reusable by architecture**
+
+The warehouse is intentionally layered so that each part has one responsibility only:
+
+landing = ingestion and standardization
+mapping = semantic alignment and lineage
+normalized = entity resolution and business constraints
+dimensional = analytics-ready facts and dimensions
+operational utilities = orchestration, logs, and observability
+
+This separation prevents business logic from leaking into BI and reduces overcoding in later layers.
+
+**Deduplicate mindset**
+
+Deduplication is not treated as a single SQL statement but as a warehouse-wide mindset. Source inconsistencies were first reduced in landing through standardization, then protected in mapping and downstream loads through deterministic exclusion logic and row signatures. In other words, duplicates are handled as early as possible, but also guarded again at later layers so the design does not rely on one fragile checkpoint.
+
+**Data integrity first**
+
+Natural keys are identified early, but surrogate keys are generated only in the normalized warehouse. This makes business-key ambiguity visible before entity resolution and helps preserve both correctness and lineage. Referential integrity is protected through controlled foreign-key resolution and default rows, so facts remain loadable without silently losing records.
 
 ## 4. Architecture Overview
 
-This project follows the **Hybrid Inmon-Kimball** architecture, also known as the **Corporate Information Factory (CIF)** model:
+This project follows a Hybrid Inmon-Kimball approach:
 
-In short, the platform is a **hybrid warehouse architecture** combining normalized integration with dimensional analytics.
+- **Landing schemas** keep raw ingestion isolated per source system
+- **Mapping tables** unify semantic rules and preserve lineage
+- **3NF (nf)** acts as the integrated enterprise model
+- **Dimensional (dim)** publishes reporting-friendly stars and facts
 
 ```mermaid
 flowchart TD
     A["SOURCE CSV FILES"] --> B["LANDING LAYER\nsl_online_retail / sl_offline_retail\nfile_fdw + src_*_raw + src_*"]
-    B --> C["STAGING / LINEAGE LAYER (stg)\nmapping_* tables\nComposed the columns \nrow_sig MD5 dedup\netl_batch_run / etl_step_run / etl_log / etl_file_registry"]
+    B --> C["MAPPING / LINEAGE LAYER (stg)\nmapping_* tables\nComposed the columns \nrow_sig MD5 dedup\netl_batch_run / etl_step_run / etl_log / etl_file_registry"]
     C --> D["NORMALIZED LAYER (Inmon - nf)\n3NF Snowflake\nnf_states → nf_cities → nf_addresses\nnf_customers / nf_stores / nf_products / nf_promotions / nf_deliveries / nf_engagements\nnf_employees_scd (SCD2) + nf_transactions"]
     D --> E["DIMENSIONAL LAYER (Kimball - dim)\nStar schema dims + dim_dates\nfct_transactions_dd_dd (partitioned)"]
     E --> F["ANALYTICS LAYER (planned)\nPower BI + KPI + DQ dashboards"]
 ```
+
+A key architectural choice is the **schema-per-source-system** landing design. Each dataset is ingested into its own landing schema first, instead of mixing sources too early. This makes source-specific parsing, standardization, and troubleshooting easier before semantic alignment begins.
 
 **Diagram above is GitHub-native Mermaid and replaces the previous image placeholder.**
 
@@ -120,7 +129,7 @@ flowchart TD
 flowchart LR
     A["CSV Row"] --> B["frg_* (file_fdw foreign table)"]
     B --> C["src_*_raw"]
-    C --> D["src_* (standardized)"]
+    C --> D["src_* (cleaned)"]
     D --> E["stg.mapping_transactions\nrow_sig MD5 + source lineage"]
     E --> F["nf.nf_transactions\nFK resolution to enterprise entities"]
     F --> G["dim.fct_transactions_dd_dd\nSurrogate-key joins + partitions"]
@@ -129,42 +138,66 @@ flowchart LR
 ### Ingestion modes
 
 **Bulk load (initial):**  
-`stg.master_ingestion_load()` → `stg.load_raw_sources()` → `stg.build_clean_staging()` → `stg.master_full_load()` → all mapping, NF, and DIM layers
+Bulk loads use a persisted snapshot pattern based on `TRUNCATE + INSERT`, making them rerunnable and operationally simple for large flat-file ingestion.`
 
 **Incremental load:**  
-Same master procedure — idempotency is guaranteed by `row_sig` deduplication on mapping_transactions and `NOT EXISTS` guards on all NF and DIM inserts. New rows are appended; existing rows are skipped or updated per SCD type.
-
-```mermaid
-flowchart LR
-    subgraph BULK[Bulk Load]
-      B1[master_ingestion_load] --> B2[build_clean_staging]
-      B2 --> B3[master_full_load]
-      B3 --> B4[Full rebuild across mapping + nf + dim]
-    end
-
-    subgraph INC[Incremental Load]
-      I1[master_ingestion_load] --> I2[build_clean_staging]
-      I2 --> I3[master_full_load]
-      I3 --> I4[Idempotent merge\nrow_sig dedup + NOT EXISTS + SCD logic]
-    end
-```
+Incremental loads use deterministic exclusion logic such as `WHERE NOT EXISTS`, anti-join patterns, row signature checks, and entity-specific SCD rules to ensure repeated runs do not create unwanted duplicates.
 
 ---
 
 ## 6. Layer Responsibilities
 
-| Layer | Schema | Purpose | Key Tables | Load Strategy |
+| Layer | Schema | Purpose | What it does | Load Strategy |
 |---|---|---|---|---|
-| **Landing — Online** | `sl_online_retail` | Raw ingest from online CSV | `frg_online_retail` (foreign), `src_online_retail_raw`, `src_online_retail` | Full reload via file_fdw; standardization via CREATE TABLE AS |
-| **Landing — Offline** | `sl_offline_retail` | Raw ingest from offline CSV | `frg_offline_retail` (foreign), `src_offline_retail_raw`, `src_offline_retail` | Full reload via file_fdw; standardization via CREATE TABLE AS |
-| **Mapping / Orchestration** | `stg` | Entity lineage, key derivation, pipeline control | `mapping_customers`, `mapping_transactions` (+ 6 others), `etl_batch_run`, `etl_log` | Incremental insert with NOT EXISTS; MD5 row_sig for transactions |
-| **Normalized (Inmon)** | `nf` | 3NF integration layer, single source of truth | `nf_customers`, `nf_products`, `nf_employees_scd`, `nf_transactions` | SCD Type 0/1/2 per entity; surrogate keys via sequences |
-| **Dimensional (Kimball)** | `dim` | Star Schema analytics layer | `dim_customers`, `fct_transactions_dd_dd` | Mirror from NF; monthly range partitions on fact |
+| **Landing — Online** | `sl_online_retail` | Raw ingestion and standardization | file_fdw, raw copy, parsing, controlled NULL handling, standardization, early duplicate reduction --> `frg_online_retail` (foreign), `src_online_retail_raw`, `src_online_retail` | Full reload via file_fdw; standardization via CREATE TABLE AS |
+| **Landing — Offline** | `sl_offline_retail` | Raw ingestion and standardization | Same pattern as online source --> `frg_offline_retail` (foreign), `src_offline_retail_raw`, `src_offline_retail` | Full reload via file_fdw; standardization via CREATE TABLE AS |
+| **Mapping / Lineage** | `stg` |Semantic alignment and source traceability --> Entity lineage, key derivation, pipeline control | source-to-target mapping, composite key preparation, lineage preservation, row signatures, orchestration metadata--> `mapping_customers`, `mapping_transactions` (+ 6 others), `etl_batch_run`, `etl_log` | Incremental insert with NOT EXISTS; MD5 row_sig for transactions |
+| **Normalized (Inmon)** | `nf` | 3NF integration layer, single source of truth | surrogate keys, entity resolution, referential integrity, SCD behavior, business constraints --> `nf_customers`, `nf_products`, `nf_employees_scd`, `nf_transactions` | SCD Type 0/1/2 per entity; surrogate keys via sequences |
+| **Dimensional (Kimball)** | `dim` | Star Schema/analytics/reporting layer | dimensions, fact tables, date dimension, partitioned reporting model --> `dim_customers`, `fct_transactions_dd_dd` | Mirror from NF; monthly range partitions on fact |
 
+This separation is intentional: landing cleans, mapping aligns, 3NF resolves, dimensional serves analytics.
 ---
 
 ## 7. Entity-Relationship Diagrams
 
+**Source triplet and data lineage**
+A core design principle is the preservation of the **full source triplet**:
+
+- `*_src_id`
+- `source_system`
+- `source_table`
+
+The same entity can appear in multiple datasets, so joining only on an ID is unsafe. The source triplet preserves lineage and makes the model auditable across online and offline data. It also supports debugging, reconciliation, and controlled incremental logic.
+
+**Business keys vs derived source identifiers**
+
+Business keys are identified early because they drive:
+
+- deduplication
+- incremental logic
+- SCD handling
+- source-to-target lineage
+
+However, profiling showed that raw business keys are not always reliable enough to represent real-world uniqueness across both sources. For that reason, row uniqueness is often defined through **derived** `*_src_id` **combinations**, while original business keys are still preserved for lineage.
+
+**Why the mapping layer matters**
+
+The mapping layer exists not only for lineage, but also to reduce cost in the normalized load. Instead of repeatedly rebuilding the same key combinations in 3NF procedures, composite identifiers and source-aligned business columns are prepared once in mapping tables. This makes downstream joins cheaper, simpler, and less error-prone. It is effectively a **“be ready with combinations of columns”** strategy to avoid overcoding the 3NF layer.
+
+**Deduplication implementation**
+Deduplication is applied with multiple controls:
+
+- standardization in `src_*` tables
+- `SELECT DISTINCT` / deterministic row cleansing where appropriate
+- `ROW_NUMBER()`-based protection for downstream uniqueness when needed
+- `WHERE NOT EXISTS`
+- `LEFT JOIN ... IS NULL`
+- `ON CONFLICT DO NOTHING`
+- `row_sig` MD5 signature for transaction-level duplicate protection
+
+This layered strategy keeps deduplication explicit and measurable rather than assumed.
+
+## 8. Entity-Relationship Diagrams
 ### Snowflake Schema (nf layer — Inmon)
 
 ```mermaid
@@ -185,7 +218,7 @@ erDiagram
     NF_CITIES ||--o{ NF_TRANSACTIONS : city_context
     NF_EMPLOYEES_SCD ||--o{ NF_TRANSACTIONS : sold_by
 ```
-
+The model is designed as a unified warehouse for both retail sources, so ERD and star schema decisions follow the rule that the same entity, when present in multiple sources, must still be representable in one integrated target structure with preserved lineage.
 Key FK chains in the snowflake schema:
 
 ```
@@ -226,7 +259,7 @@ flowchart TB
 
 ---
 
-## 8. Star Schema & Bus Matrix
+## 9. Star Schema & Bus Matrix
 
 ### Dimensions
 
@@ -256,12 +289,15 @@ flowchart TB
 | **Combined (unified fact)** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 > Note: Online transactions carry `engagement_id` (digital behavior); offline transactions carry `store_id` and `employee_id`. Rows without a valid FK resolve to the `-1` sentinel (unknown) dimension row, preserving referential integrity without data loss.
+> **Date table strategy:** The date dimension is treated as a special warehouse dimension. Unlike other dimensions, it is not populated from the normalized layer.
+> **Granularity awareness **
+The fact table grain is explicitly defined as one row = one retail transaction.
 
 ---
 
-## 9. Pipeline Orchestration Flow
+## Pipeline Orchestration, Logging, and Batch Logic
 
-The pipeline is fully orchestrated via a hierarchy of PL/pgSQL stored procedures:
+The pipeline is orchestrated through PL/pgSQL stored procedures that separate ingestion, standardization, mapping, normalized load, and dimensional load.
 
 ```mermaid
 flowchart TD
@@ -303,10 +339,51 @@ flowchart LR
     L1 --> L3
     L1 --> L4
 ```
+**Log table purpose**
 
+The log tables are not decorative metadata; they are operational controls. They record:
+
+- which procedure ran
+- when it ran
+- batch and step identifiers
+- rows read / inserted / updated
+- status and error details
+
+This makes ETL behavior testable and supports the idempotency requirement: re-running the same procedure with the same source data should produce either zero new rows or an explicitly justified result for snapshot reloads.
+
+**Batch logic**
+
+A batch represents one controlled execution unit of the pipeline. It groups multiple ETL steps under one run context so the process becomes traceable end to end. In practice, batch logic is what allows the warehouse to answer questions like:
+
+- Which file set was loaded together?
+- Which step failed?
+- How many rows were read vs loaded?
+- Was this a bulk reload or an incremental run?
+
+Without batch control, logs stay fragmented; with it, the pipeline becomes operationally auditable.
+
+**Exception block and SQLERRM**
+
+Every procedure should include a controlled BEGIN ... EXCEPTION ... END block. The purpose is not only to catch failure, but to preserve observability and keep the pipeline diagnosable. In this context:
+
+- `SQLERRM` returns the textual database error message
+- `GET STACKED DIAGNOSTICS` captures deeper diagnostic context
+- `RAISE NOTICE` / `RAISE EXCEPTION` make failure visible and structured
+
+This is essential for log tables, troubleshooting, and preventing silent partial failures.
+
+Transaction safety
+
+Multi-step loads must be executed with transaction awareness. When a load must behave atomically, partial writes are not acceptable. The general pattern is:
+
+BEGIN;
+-- ETL steps
+COMMIT;
+-- on failure: ROLLBACK;
+This protects the warehouse from being left in an inconsistent state after a failed step.
 ---
 
-## 10. SCD Strategy by Entity
+## 11. SCD Strategy by Entity
 
 Slowly Changing Dimensions (SCD) define how changes in source data are handled in the warehouse. This project applies three strategies based on the business nature of each entity.
 
@@ -325,6 +402,15 @@ Slowly Changing Dimensions (SCD) define how changes in source data are handled i
 | `nf_products` | **Type 1** | Product attributes overwrite — stock levels update in place |
 | `nf_employees_scd` | **Type 2** | Salary and position changes must be historically tracked (each change creates a new version with `start_dt`, `end_dt`, `is_active`) |
 
+**SCD handling and upsert mindset**
+SCD logic is not treated as a generic merge shortcut. Type 1 entities use overwrite-style logic where business meaning allows it, while Type 2 entities use controlled versioning with:
+
+- `start_dt`
+- `end_dt`
+- `is_active`
+
+This is effectively an **UPSERT-by-business-rule** pattern, not a blind technical upsert. For Type 2, the old row is expired and a new active row is inserted.
+
 ```mermaid
 flowchart LR
     T0["Type 0\nNo change allowed"] --> X0["Initial value kept forever"]
@@ -334,8 +420,47 @@ flowchart LR
 
 ---
 
-## 11. Data Quality & Governance Framework
+### 12. Data Quality & Governance, Integrrity, and Join Strategy 
 
+**Referential integrity and default rows**
+Every main target table includes a default row strategy. Standard pattern:
+
+- surrogate key = -1
+- descriptive attributes = 'N/A'
+
+This prevents fact loads from breaking when a dimension lookup fails. Instead of dropping the transaction, the warehouse preserves the row and routes the unresolved reference to the unknown member. This protects referential integrity without sacrificing **data retention**.
+
+**Deterministic NULL handling**
+NULLs are handled intentionally, not passively:
+
+- text defaults use `'n.a.'`
+- numeric / ID defaults use `-1`
+- date defaults use warehouse-defined boundary dates where appropriate
+- `COALESCE` is used when a stable default is required
+- explicit `IS NULL` checks are used when business meaning depends on absence
+
+This avoids uncontrolled NULL propagation into aggregations and reporting.
+
+**Left join strategy and why**
+In the 3NF layer, `LEFT JOIN` **is preferred intentionally** because row preservation matters more than forcing perfect match completeness during integration. Using only INNER JOIN in enterprise integration can silently discard valid source rows whose reference lookup is still unresolved. The warehouse should preserve the business event first and then resolve unmatched dimensions through default-row logic if needed.
+
+**Semi join and anti join**
+Two important logical patterns are used in the project even when implemented through PostgreSQL-friendly SQL forms:
+
+- **Semi join purpose:** check whether a matching row exists, without multiplying rows from the matched table. In practice, this is commonly implemented using `EXISTS`. It is useful for validation, controlled filtering, and incremental selection.
+- **Anti join purpose:** find rows that do not yet exist in the target. In practice, this is implemented with `WHERE NOT EXISTS` or `LEFT JOIN ... IS NULL`. It is essential for rerunnable incremental loads and duplicate prevention.
+
+These patterns are important because they support idempotency more safely than over-reliance on broad DISTINCT logic alone.
+
+**Data type discipline**
+Raw ingestion can temporarily use flexible types, but normalized and dimensional layers enforce explicit typing:
+
+`DATE` for dates
+`NUMERIC` for measures
+`BIGINT` / integer types for identifiers
+`BOOLEAN` where appropriate
+
+Strong typing improves correctness, aggregations, and BI predictability.
 ### DQ Dimensions
 
 | Dimension | Description | Expectation | Status |
@@ -357,18 +482,6 @@ flowchart TB
     DQ --> C5[Accuracy 🔄]
     DQ --> C6[Timeliness ✓]
 ```
-
-### Referential Integrity — Default Sentinel Row Pattern
-
-To prevent FK violations when dimension keys cannot be resolved (e.g. an online transaction has no store), every dimension table contains a default row with surrogate key `-1`:
-
-```sql
--- Example: unknown customer row
-INSERT INTO nf.nf_customers (customer_id, customer_src_id, ..., address_id)
-VALUES (-1, 'n.a.', ..., -1);
-```
-
-When the fact load performs a LEFT JOIN to a dimension and finds no match, `COALESCE(dim.surrogate_id, -1)` assigns the unknown sentinel. This ensures 100% referential integrity while preserving all transaction records.
 
 ### MD5 Row Signature Logic
 
@@ -406,34 +519,51 @@ An `stg.security_audit_log` table tracks DML operations for sensitive tables.
 
 ---
 
-## 12. Design Decisions
+## 13. Performance and Indexing Strategy
+Performance is considered explicitly, not assumed. The goal is not “fast at any cost,” but correct first, then measurable optimization.
 
-### Why Composite Keys Instead of Raw Source IDs?
+### Indexing strategy
+Indexes are created intentionally around warehouse access patterns. In particular:
 
-Source natural keys (`customer_id`, `product_id`, etc.) in the synthetic dataset are unreliable — the same customer appears with the same ID but different attribute combinations across sources. Composite key derivation (concatenating stable attributes) produces a more reliable business key before assigning the surrogate.
+- source lineage columns such as src_id, source_system, and source_table are indexed where needed because they are frequently used in joins and incremental validation
+- fact tables use date-oriented indexing and partitioning
+- lookup and foreign-key access paths are supported with targeted indexes
+- indexing is used to support join cost reduction, not as a substitute for poor SQL design
 
-### Why a Mapping Layer?
+### Why this matters 
 
-The mapping layer (`stg.mapping_*` tables) serves three purposes:
-1. **Key lineage** — both the raw NK and the derived composite `src_id` are stored together
-2. **Early data profiling** — grain and entity behavior can be observed at the mapping layer before committing to the normalized structure
-3. **Fast downstream joins** — all `*_src_id` values needed by `load_ce_transactions()` are pre-computed in `mapping_transactions`, avoiding repeated re-derivation
+Because the model preserves lineage and uses layered joins, indexing is needed to keep:
 
-### Why Range Partitioning on the Fact Table?
+- incremental checks efficient
+- FK lookups stable
+- SCD comparisons faster
+- partition-pruned fact access practical
+- Partitioning and large-table considerations
 
-With 950,000+ rows spanning 24 months, monthly range partitions on `transaction_date` allow PostgreSQL to perform **partition pruning** — time-range queries scan only the relevant month's partition rather than the full table. BRIN indexes on `transaction_dt` further reduce I/O within partitions.
+### Partitioning and large-table considerations
+The fact table is range-partitioned by month. This supports partition pruning for time-bound queries and reduces unnecessary scans on large transaction volumes. For ordered date workloads, lightweight index choices such as **BRIN** are appropriate, while entity and join lookups may still benefit from **B-tree** indexes.
 
-### Why file_fdw for Ingestion?
+### Controlled ID generation
 
-PostgreSQL's `file_fdw` extension allows a CSV file to be queried as if it were a native table. This avoids loading data via `\COPY` (which requires superuser file access) or an external Python script. In Google Colab, this approach enables a self-contained pipeline that reads, transforms, and stores data entirely within PostgreSQL — with the CSV path dynamically updated per batch.
-
-### Why Google Colab + PostgreSQL?
-
-The entire project was engineered under the constraint of no local PostgreSQL installation, no DBeaver, and no persistent storage. PostgreSQL 14 is installed at Colab startup, the database is bootstrapped from SQL scripts, and Google Drive is used as the CSV landing zone. This proves the pipeline design is tool-agnostic and portable.
-
+Generated identifiers use **explicit sequences**, not SERIAL. This improves transparency, predictability, and migration flexibility. Surrogate keys are introduced in the warehouse layers deliberately, rather than being mixed into early raw ingestion.
 ---
 
-## 13. Project Roadmap
+## 14. Design Decisions
+
+**Why file_fdw?**
+`file_fdw` lets PostgreSQL read CSV files as **foreign tables**, meaning flat files become queryable through SQL before physical loading. This is both theoretically clean and practically useful in a constrained environment such as Colab. It also supports a rerunnable ingestion setup because file definitions can be recreated or repointed without rewriting the entire ingestion logic.
+
+**Why source-specific landing schemas?**
+Because online and offline datasets share some business entities but still arrive from different operational contexts. Keeping them separate at first makes cleansing and source-aware debugging easier, while later mapping tables bring them into a unified warehouse shape.
+
+**Why preserve original business keys if they are unreliable?**
+Because lineage and uniqueness are different concerns. Original business keys remain valuable for traceability and audit, even when they are not reliable enough to drive warehouse-level deduplication. For that reason, the model preserves them descriptively while using stronger derived identifiers and warehouse surrogate keys for integration and fact joins.
+
+**Why no hardcoded business logic in BI?**
+Power BI should consume modeled data, not redefine core transformation rules. If business logic lives outside the warehouse, the warehouse stops being the single source of truth. This project keeps business logic inside SQL layers intentionally.
+
+
+## 15. Project Roadmap
 
 ### Completed ✓
 - [x] Bulk ingestion pipeline (475k rows per source)
@@ -463,11 +593,13 @@ The entire project was engineered under the constraint of no local PostgreSQL in
 
 ---
 
-## 14. How to Run
+## 16. How to Run
 
 ### Prerequisites
-- Google Colab account
-- Google Drive with the four CSV files placed in `My Drive/retail_dw_data/`
+- Google Colab 
+- Google Drive
+- CSV files mounted into the expected folder path
+  This is in my case. Otherwise, PostgreSQL, pgAdmin, DBeaver, Python used initially.
 
 ### File naming convention
 ```
@@ -477,96 +609,43 @@ The entire project was engineered under the constraint of no local PostgreSQL in
 04_empty_5_on.csv     ← Online incremental  (25k rows)
 ```
 
-### Execution order
+## 17. ABBREVATIONs
 
-Open `notebooks/retail_dw_pipeline.ipynb` in Google Colab and run cells in order:
-
-```
-Cell 00 — Cleanup (kill stale processes)
-Cell 01 — Install PostgreSQL 14
-Cell 02 — Mount Google Drive, copy CSVs to Colab disk
-Cell 03 — Create DB, extensions (file_fdw, uuid-ossp), schemas
-Cell 04 — Set file permissions for postgres user
-Cell 05 — Create orchestration tables (etl_batch_run, etl_step_run, etl_log, etl_file_registry)
-Cell 06 — Create logging function and view
-Cell 07 — Create foreign tables (frg_offline_retail, frg_online_retail)
-Cell 08 — Create raw landing tables
-Cell 09 — Create raw ingestion procedures (load_raw_offline, load_raw_online)
-Cell 10 — Create online standardization procedure
-Cell 11 — Create offline standardization procedure
-Cell 12 — Create staging wrappers (load_raw_sources, build_clean_staging)
-Cell 13 — Create master ingestion procedure
-Cell 14 — EXECUTE: Bulk load (master_ingestion_load)
-Cell 15 — Create mapping DDLs and procedures
-Cell 16 — Create normalized (nf) schema DDLs and default rows
-Cell 17 — Create nf load procedures
-Cell 18 — Create dimensional (dim) schema DDLs and default rows
-Cell 19 — Create dim load procedures
-Cell 20 — Create master_full_load orchestrator
-Cell 21 — EXECUTE: Full DWH build (master_full_load)
-Cell 22 — Verify: SELECT from etl_log, etl_batch_run
-Cell 23 — EXECUTE: Incremental load test (master_ingestion_load + master_full_load)
-```
-
-> ⚠️ **Important:** Google Colab sessions reset on disconnect. The PostgreSQL database is not persistent. Re-run from Cell 01 on each new session. Persistent deployment requires Docker or a cloud PostgreSQL instance.
+| Term | Definition | Used in This Project |
+|---|---|---|
+| **ELT** | Extract → Load → Transform. Data lands raw first; all transformation happens inside the target DB engine. | Full pipeline pattern. Raw CSV → PostgreSQL → transformation in PL/pgSQL |
+| **ETL** | Extract → Transform → Load. Transformation happens outside the DB before loading. | Not used here — distinguished intentionally |
+| **file_fdw** | PostgreSQL foreign data wrapper that maps a CSV file to a virtual table (foreign table) queryable with SQL. | Used to ingest online and offline CSV files as `frg_online_retail` and `frg_offline_retail` |
+| **Staging Layer** | A landing zone that holds raw + standardized source data before business logic is applied. | `sl_online_retail` and `sl_offline_retail` schemas |
+| **Data Integration** | Combining data from multiple source systems into a unified structure. | UNION ALL of online and offline sources in mapping procedures |
+| **Source Key (NK)** | The natural key from the source system (e.g. `customer_id` from the CSV). Also called Natural Key. | Stored as `*_id_nk` in mapping tables |
+| **Composite Key** | A surrogate key derived by concatenating multiple attributes where no single reliable NK exists. | `customer_src_id = gender + marital_status + dob + zip + city + state` |
+| **Surrogate Key** | A system-generated integer key used as the primary key in normalized and dimensional layers. | All `nf.*` and `dim.*` tables use BIGINT surrogates via sequences |
+| **SCD Type 0** | Fixed — once loaded, values never change. | `nf_stores`, `nf_deliveries`, `nf_promotions` |
+| **SCD Type 1** | Overwrite — new values replace old values. No history kept. | `nf_customers`, `nf_products` |
+| **SCD Type 2** | Versioning — each change creates a new row with `start_dt`, `end_dt`, `is_active`. History is preserved. | `nf_employees_scd`, `dim_employees_scd` |
+| **3NF (Snowflake Schema)** | Third Normal Form. Each table stores facts about one entity only; related data is in separate tables joined by FK. | `nf` schema — 13 tables with FK hierarchy |
+| **Star Schema** | Denormalized dimensional model. Dimension attributes are flattened into wide tables around a central fact. | `dim` schema — 7 dimensions + 1 partitioned fact table |
+| **Inmon CIF** | Corporate Information Factory. Bill Inmon's methodology: build a normalized enterprise DWH first, then derive data marts. | `nf` schema mirrors the CIF integration layer |
+| **Hybrid Inmon-Kimball** | Architecture that maintains both a 3NF integration layer (Inmon) and Star Schema data mart (Kimball). | Exact architecture of this project |
+| **Data Profiling** | Statistical analysis of source data to understand distribution, nullability, uniqueness, and grain. | Performed post-standardization to validate entity grain |
+| **Data Quality (DQ)** | Fitness of data for its intended use, measured across 6 dimensions. | DQ framework defined — test implementation in progress |
+| **Data Governance** | Policies, roles, and controls that ensure data is managed responsibly. | GRANT/REVOKE role-based access control defined; audit log table created |
+| **MD5 Row Signature** | An MD5 hash of key fields used as a duplicate-detection fingerprint for transaction rows. | `row_sig = MD5(source_system || transaction_id || customer_id || product_id || ...)` |
+| **Referential Integrity** | All foreign key references point to a real row — no orphan records. | Default (-1) sentinel rows inserted in all dimension/reference tables before fact load |
+| **Range Partitioning** | Splitting a large table by a range of values (e.g. date) so queries only scan relevant partitions. | `fct_transactions_dd_dd` partitioned by `transaction_date` monthly |
+| **BRIN Index** | Block Range INdex. Lightweight index for ordered columns in large tables (e.g. dates). | Applied to `transaction_dt` on fact table for time-range query acceleration |
+| **Bus Matrix** | A Kimball artifact showing which dimensions participate in which business processes. | See Section 8 |
 
 ---
-
-## 15. Repository Structure
-
-```
-retail-dw-pipeline/
-│
-├── README.md
-├── ARCHITECTURE.md                  ← Detailed design decisions
-│
-├── docs/
-│   ├── 01_architecture.md
-│   ├── 02_layer_design.md
-│   ├── 04_scd_strategy.md
-│   ├── 07_data_quality_framework.md
-│   └── images/
-│       ├── data_flow.png
-│       ├── orchestration_flow.png
-│       └── star_schema.png
-│
-├── sql/
-│   ├── 00_setup/
-│   ├── 01_landing/
-│   ├── 02_staging/
-│   │   └── mapping/
-│   ├── 03_normalized_layer/
-│   │   └── procedures/
-│   ├── 04_dimensional_layer/
-│   │   └── procedures/
-│   ├── 05_orchestration/
-│   └── 06_security/
-│
-├── entities/
-│   ├── customer.md
-│   ├── product.md
-│   ├── promotion.md
-│   ├── delivery.md
-│   ├── employee.md                  ← SCD2 — most detailed
-│   ├── engagement.md
-│   ├── store.md
-│   └── transaction.md
-│
-├── data_quality/
-│   ├── profiling_results.md
-│   └── dq_check_queries.sql
-│
-└── notebooks/
-    └── retail_dw_pipeline.ipynb
-```
 
 ---
 
 ## About This Project
 
-Built as a portfolio and research foundation for graduate-level study in Data Science and Business Analytics. The primary goal was to demonstrate end-to-end data warehouse engineering — from raw file ingestion through entity normalization, dimensional modeling, and pipeline orchestration — using only native PostgreSQL capabilities, without relying on managed services or abstraction frameworks.
+This project was built as a portfolio-grade warehouse engineering case focused on explicit design choices rather than hidden abstractions. The main objective was to show how raw files can be turned into a governed analytical model through SQL-native ingestion, standardization, lineage preservation, normalized integration, dimensional modeling, and orchestration.
 
-The constraint-driven approach (Colab + file_fdw) was intentional: it forces explicit engagement with concepts that higher-level tools abstract away.
+The constraint-driven setup was intentional: by building under limited infrastructure, the project makes the underlying warehouse principles more visible.
 
 ---
 
