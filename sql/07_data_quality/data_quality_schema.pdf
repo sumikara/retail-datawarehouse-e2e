@@ -1,0 +1,263 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 2 /Kids [5 0 R 7 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 2789 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 40 802 Tm
+(Data Quality Schema \(Mermaid Native Code\) - Page {page_idx}) Tj
+0 -18 Td
+(flowchart BT) Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    %% DM) Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    subgraph DM["DM"]) Tj
+0 -12 Td
+(        direction LR) Tj
+0 -12 Td
+(        DC["dim_customers"]) Tj
+0 -12 Td
+(        DP["dim_products"]) Tj
+0 -12 Td
+(        DPR["dim_promotions"]) Tj
+0 -12 Td
+(        DD["dim_deliveries"]) Tj
+0 -12 Td
+(        DSE["dim_stores / dim_employees_scd"]) Tj
+0 -12 Td
+(        DDT["dim_dates"]) Tj
+0 -12 Td
+(        FF["fct_transactions_dd_dd"]) Tj
+0 -12 Td
+(    end) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    %% DWH) Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    subgraph DWH["DWH"]) Tj
+0 -12 Td
+(        direction LR) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(        MC["stg.mapping_customers"]) Tj
+0 -12 Td
+(        MP["stg.mapping_products"]) Tj
+0 -12 Td
+(        MT["stg.mapping_transactions"]) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(        NFR["nf reference\\nnf_states\\nnf_cities\\nnf_addresses\\nnf_product_categories\\nnf_promotion_types\\nnf_shipping_partners"]) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(        NFM["nf master entities\\nnf_customers\\nnf_products\\nnf_promotions\\nnf_deliveries\\nnf_engagements\\nnf_stores"]) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(        NFE["nf_employees_scd"]) Tj
+0 -12 Td
+(        NFT["nf_transactions"]) Tj
+0 -12 Td
+(    end) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    %% LANDING) Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    subgraph LAND["Landing"]) Tj
+0 -12 Td
+(        direction LR) Tj
+0 -12 Td
+(        SLON["sl_online_retail\\n- frg_online_retail\\n- src_online_retail_raw\\n- src_online_retail"]) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(        SLOFF["sl_offline_retail\\n- frg_offline_retail\\n- src_offline_retail_raw\\n- src_offline_retail"]) Tj
+0 -12 Td
+(    end) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    %% SOURCE) Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    subgraph SRC["Source"]) Tj
+0 -12 Td
+(        direction LR) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(        subgraph OS["Online Source System"]) Tj
+0 -12 Td
+(            O1["online CSV - customers"]) Tj
+0 -12 Td
+(            O2["online CSV - products"]) Tj
+0 -12 Td
+(            O3["online CSV - sales"]) Tj
+0 -12 Td
+(        end) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(        subgraph FS["Offline Source System"]) Tj
+0 -12 Td
+(            F1["offline CSV - customers"]) Tj
+0 -12 Td
+(            F2["offline CSV - stores"]) Tj
+0 -12 Td
+(            F3["offline CSV - employees"]) Tj
+0 -12 Td
+(            F4["offline CSV - sales"]) Tj
+0 -12 Td
+(        end) Tj
+0 -12 Td
+(    end) Tj
+0 -12 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 1301 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 40 802 Tm
+(Data Quality Schema \(Mermaid Native Code\) - Page {page_idx}) Tj
+0 -18 Td
+() Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    %% FLOWS) Tj
+0 -12 Td
+(    %% =========================) Tj
+0 -12 Td
+(    O1 --> SLON) Tj
+0 -12 Td
+(    O2 --> SLON) Tj
+0 -12 Td
+(    O3 --> SLON) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    F1 --> SLOFF) Tj
+0 -12 Td
+(    F2 --> SLOFF) Tj
+0 -12 Td
+(    F3 --> SLOFF) Tj
+0 -12 Td
+(    F4 --> SLOFF) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    SLON --> MC) Tj
+0 -12 Td
+(    SLON --> MP) Tj
+0 -12 Td
+(    SLON --> MT) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    SLOFF --> MT) Tj
+0 -12 Td
+(    SLOFF --> NFM) Tj
+0 -12 Td
+(    SLOFF --> NFE) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    MC --> NFM) Tj
+0 -12 Td
+(    MP --> NFR) Tj
+0 -12 Td
+(    MP --> NFM) Tj
+0 -12 Td
+(    MT --> NFT) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    NFR --> NFM) Tj
+0 -12 Td
+(    NFM --> FF) Tj
+0 -12 Td
+(    NFE --> DSE) Tj
+0 -12 Td
+(    NFT --> FF) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    NFM --> DC) Tj
+0 -12 Td
+(    NFM --> DP) Tj
+0 -12 Td
+(    NFM --> DPR) Tj
+0 -12 Td
+(    NFM --> DD) Tj
+0 -12 Td
+(    NFM --> DSE) Tj
+0 -12 Td
+() Tj
+0 -12 Td
+(    DDT --> FF) Tj
+0 -12 Td
+(    DC --> FF) Tj
+0 -12 Td
+(    DP --> FF) Tj
+0 -12 Td
+(    DPR --> FF) Tj
+0 -12 Td
+(    DD --> FF) Tj
+0 -12 Td
+(    DSE --> FF) Tj
+0 -12 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000191 00000 n 
+0000003032 00000 n 
+0000003158 00000 n 
+0000004511 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+4637
+%%EOF
