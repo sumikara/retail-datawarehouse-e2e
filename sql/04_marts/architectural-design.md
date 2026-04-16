@@ -2,7 +2,7 @@
 
 ### Purpose and Design Intent
 
-The **dim** layer is the warehouse’s **data mart / star schema layer**, designed for **reporting, analytical querying, and BI consumption**. While the **BL_3NF** layer focuses on normalization, integration, and anomaly-safe entity resolution, the **dim** layer reshapes that integrated data into dimensional models optimized for business analysis.
+The **dim** layer is the warehouse’s **data mart / star schema layer**, designed for **reporting, analytical querying, and BI consumption**. While the **nf** layer focuses on normalization, integration, and anomaly-safe entity resolution, the **dim** layer reshapes that integrated data into dimensional models optimized for business analysis.
 
 Its main objective is to support **dimensional modeling** by organizing data into **facts and dimensions**, improving analytical usability, and preparing the warehouse for BI tools and reporting workloads.
 
@@ -14,7 +14,7 @@ Its main objective is to support **dimensional modeling** by organizing data int
 - Rolling window logic must be handled in `dim`.
 - Rolling window operations should be parameterized through **dynamic SQL**.
 - The dimensional layer must use **surrogate keys**, not 3NF-style composite primary key logic.
-- In `dim`, `source_system` must always be set to `'bl_3nf'`.
+- In `dim`, `source_system` must always be set to `'nf'`.
 
 ### Partitioning and Rolling Window Strategy
 
@@ -24,7 +24,7 @@ The **rolling window** approach also belongs exclusively to the data mart layer.
 
 ### Key Management
 
-The **dim** layer does not follow the same key logic as **BL_3NF**. This layer is built for analytical modeling, so it must rely on **surrogate keys**.
+The **dim** layer does not follow the same key logic as **nf**. This layer is built for analytical modeling, so it must rely on **surrogate keys**.
 
 Key rules are:
 
@@ -32,11 +32,11 @@ Key rules are:
 - `dim` generates its own new surrogate keys
 - dimension tables must use DM-level surrogate keys
 - fact tables must reference dimension surrogate keys
-- `source_system` must always be `'bl_3nf'`
+- `source_system` must always be `'nf'`
 
 This creates a clean separation between:
 
-- **enterprise integration identity** in `bl_3nf`
+- **enterprise integration identity** in `nf`
 - **analytical identity** in `dim`
 
 In dimensional modeling terms, this is the layer where the effective “composite key kingdom” emerges: not as a traditional relational composite PK, but as a **fact-level structure built from multiple dimension surrogate keys** such as `customer_surr_id`, `product_surr_id`, `date_surr_id`, `store_surr_id`, and similar dimension references. This combination is what gives the fact table its analytical context and makes it optimal for BI tools.
@@ -97,13 +97,13 @@ Typical examples include combinations such as:
 
 This is what makes the star schema highly efficient for BI and analytical queries.
 
-### BL_3NF to dim Transition Rule
+### nf to dim Transition Rule
 
 The relationship between the normalized and dimensional layers must remain explicit:
 
-- the surrogate key generated in **BL_3NF** becomes the `*_src_id` reference in **dim**
+- the surrogate key generated in **nf** becomes the `*_src_id` reference in **dim**
 - **dim** then creates its own analytical surrogate key for the target dimension
-- `source_system` in the DM layer must always be `'bl_3nf'`
+- `source_system` in the DM layer must always be `'nf'`
 
 This ensures that dimensional models stay analytically optimized without losing integration lineage.
 
@@ -116,7 +116,7 @@ This ensures that dimensional models stay analytically optimized without losing 
 | Rolling window | Implement only in `dim`, parameterized with dynamic SQL |
 | Key strategy | Use DM-level surrogate keys |
 | 3NF handoff | 3NF surrogate keys become `*_src_id` in `dim` |
-| Source system | Always `'bl_3nf'` |
+| Source system | Always `'nf'` |
 | Fact modeling | Fact tables reference dimension surrogate keys |
 | Composite key mindset | Analytical meaning comes from the combination of dimension SKs in the fact table |
 | Constraint rule | Do not apply PK or UNIQUE on `(src_id, start_dt)` |
