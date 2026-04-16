@@ -41,11 +41,11 @@ This guarantees that lineage is never lost, even after entity integration. (Trac
 
 ### Source System Handling in 3NF
 
-For **deduplicated datasets**, `source_system` must always be set to `'bl_cl'`, and `source_table` must point to the corresponding deduplicated or mapping table coming from the cleansing layer.
+For **deduplicated datasets**, `source_system` must always be set to `'stg'`, and `source_table` must point to the corresponding deduplicated or mapping table coming from the cleansing layer.
 
 For **non-deduplicated entities** such as **customers, employees, engagements, and stores**, the original `source_system` and `source_table` values must be preserved, because these entities may still carry source-specific duplication patterns and require lineage to remain visible in the core layer.
 
-Even if duplicates exist across both sources — for example the same category such as **`Toys`** appearing in both online and offline data — only **one integrated row** should be stored in **nf**, and its lineage should indicate that it originated from the deduplicated `bl_cl` layer.
+Even if duplicates exist across both sources — for example the same category such as **`Toys`** appearing in both online and offline data — only **one integrated row** should be stored in **nf**, and its lineage should indicate that it originated from the deduplicated `stg` layer.
 
 ### Query and Load Standards
 
@@ -148,7 +148,7 @@ This preserves a clean separation between:
 | Partitioning | Not allowed in `nf`; allowed only in `dim` |
 | Key strategy | Preserve broken source IDs as `*_src_id`; generate surrogate keys with `SEQUENCE` |
 | Lineage | Always keep `*_src_id + source_system + source_table` |
-| Source handling | Deduplicated rows use `source_system = 'bl_cl'`; non-deduplicated entities keep original source metadata |
+| Source handling | Deduplicated rows use `source_system = 'stg'`; non-deduplicated entities keep original source metadata |
 | Join standard | `LEFT JOIN` only |
 | Union standard | `UNION ALL` only |
 | Dedup guarantee | `ROW_NUMBER()` in every insert pipeline |
