@@ -1,0 +1,1063 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 7 /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R 17 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Length 2840 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 36 806 Tm
+(DWH Schema for Data Quality - Page 1) Tj
+0 -16 Td
+(# DWH SCHEMA \(FOR DATA QUALITY TEST DESIGN\)) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(## LAYER FLOW) Tj
+0 -11 Td
+(SOURCE -> LANDING -> MAPPING -> NF -> DIM) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(## SOURCE) Tj
+0 -11 Td
+(- ONLINE CSV) Tj
+0 -11 Td
+(- OFFLINE CSV) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(## LANDING) Tj
+0 -11 Td
+(- sl_online_retail) Tj
+0 -11 Td
+(  - frg_online_retail) Tj
+0 -11 Td
+(  - src_online_retail_raw) Tj
+0 -11 Td
+(  - src_online_retail) Tj
+0 -11 Td
+(- sl_offline_retail) Tj
+0 -11 Td
+(  - frg_offline_retail) Tj
+0 -11 Td
+(  - src_offline_retail_raw) Tj
+0 -11 Td
+(  - src_offline_retail) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(## MAPPING) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### stg.mapping_customers) Tj
+0 -11 Td
+(- customer_id_nk : VARCHAR\(20\)) Tj
+0 -11 Td
+(- gender : VARCHAR\(20\)) Tj
+0 -11 Td
+(- marital_status : VARCHAR\(20\)) Tj
+0 -11 Td
+(- birth_of_dt : DATE) Tj
+0 -11 Td
+(- membership_dt : DATE) Tj
+0 -11 Td
+(- customer_zip_code : VARCHAR\(30\)) Tj
+0 -11 Td
+(- customer_city : VARCHAR\(100\)) Tj
+0 -11 Td
+(- customer_state : VARCHAR\(100\)) Tj
+0 -11 Td
+(- last_purchase_dt : TIMESTAMP) Tj
+0 -11 Td
+(- customer_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### stg.mapping_stores) Tj
+0 -11 Td
+(- store_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- store_name : VARCHAR\(100\)) Tj
+0 -11 Td
+(- store_zip_code : VARCHAR\(30\)) Tj
+0 -11 Td
+(- store_city : VARCHAR\(100\)) Tj
+0 -11 Td
+(- store_state : VARCHAR\(100\)) Tj
+0 -11 Td
+(- store_location_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### stg.mapping_products) Tj
+0 -11 Td
+(- product_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- product_category : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_name : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_brand : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_stock : INTEGER) Tj
+0 -11 Td
+(- product_material : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_manufacture_dt : TIMESTAMP) Tj
+0 -11 Td
+(- product_expiry_dt : TIMESTAMP) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### stg.mapping_promotions) Tj
+0 -11 Td
+(- promotion_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- promotion_type : VARCHAR\(100\)) Tj
+0 -11 Td
+(- promotion_channel : VARCHAR\(100\)) Tj
+0 -11 Td
+(- promotion_start_dt : TIMESTAMP) Tj
+0 -11 Td
+(- promotion_end_dt : TIMESTAMP) Tj
+0 -11 Td
+(- promotion_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 3217 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 36 806 Tm
+(DWH Schema for Data Quality - Page 2) Tj
+0 -16 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### stg.mapping_deliveries) Tj
+0 -11 Td
+(- delivery_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- delivery_type : VARCHAR\(100\)) Tj
+0 -11 Td
+(- delivery_status : VARCHAR\(100\)) Tj
+0 -11 Td
+(- shipping_partner : VARCHAR\(100\)) Tj
+0 -11 Td
+(- delivery_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### stg.mapping_engagements) Tj
+0 -11 Td
+(- engagement_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- customer_support_calls : INTEGER) Tj
+0 -11 Td
+(- website_address : VARCHAR\(250\)) Tj
+0 -11 Td
+(- order_channel : VARCHAR\(100\)) Tj
+0 -11 Td
+(- customer_support_method : VARCHAR\(100\)) Tj
+0 -11 Td
+(- issue_status : VARCHAR\(100\)) Tj
+0 -11 Td
+(- app_usage : VARCHAR\(100\)) Tj
+0 -11 Td
+(- website_visits : INTEGER) Tj
+0 -11 Td
+(- social_media_engagement : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### stg.mapping_employees) Tj
+0 -11 Td
+(- employee_src_id : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- employee_name_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- employee_position : VARCHAR\(100\)) Tj
+0 -11 Td
+(- employee_salary : NUMERIC\(10,2\)) Tj
+0 -11 Td
+(- employee_hire_date : DATE) Tj
+0 -11 Td
+(- observed_ts : TIMESTAMP) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### stg.mapping_transactions) Tj
+0 -11 Td
+(- transaction_id : VARCHAR\(100\)) Tj
+0 -11 Td
+(- transaction_dt : TIMESTAMP) Tj
+0 -11 Td
+(- total_sales : NUMERIC\(10,2\)) Tj
+0 -11 Td
+(- payment_method : VARCHAR\(100\)) Tj
+0 -11 Td
+(- quantity : INTEGER) Tj
+0 -11 Td
+(- unit_price : NUMERIC\(10,2\)) Tj
+0 -11 Td
+(- discount_applied : NUMERIC\(10,2\)) Tj
+0 -11 Td
+(- day_of_week : VARCHAR\(100\)) Tj
+0 -11 Td
+(- week_of_year : INTEGER) Tj
+0 -11 Td
+(- month_of_year : INTEGER) Tj
+0 -11 Td
+(- customer_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- promotion_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- delivery_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- engagement_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- employee_name_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- employee_hire_date : DATE) Tj
+0 -11 Td
+(- customer_city : VARCHAR\(100\)) Tj
+0 -11 Td
+(- customer_state : VARCHAR\(100\)) Tj
+0 -11 Td
+(- store_zip_code : VARCHAR\(30\)) Tj
+0 -11 Td
+(- store_city : VARCHAR\(100\)) Tj
+0 -11 Td
+(- store_state : VARCHAR\(100\)) Tj
+0 -11 Td
+(- store_location_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_name : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_category : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_brand : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_material : VARCHAR\(100\)) Tj
+0 -11 Td
+(- promotion_type : VARCHAR\(100\)) Tj
+0 -11 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 3493 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 36 806 Tm
+(DWH Schema for Data Quality - Page 3) Tj
+0 -16 Td
+(- promotion_channel : VARCHAR\(100\)) Tj
+0 -11 Td
+(- promotion_start_dt : TIMESTAMP) Tj
+0 -11 Td
+(- promotion_end_dt : TIMESTAMP) Tj
+0 -11 Td
+(- delivery_type : VARCHAR\(100\)) Tj
+0 -11 Td
+(- shipping_partner : VARCHAR\(100\)) Tj
+0 -11 Td
+(- customer_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- product_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- promotion_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- delivery_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- store_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- city_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- employee_src_id : VARCHAR\(255\)) Tj
+0 -11 Td
+(- row_sig : TEXT [UNIQUE INDEX ux_mapping_transactions_rowsig]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(## NF) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_states) Tj
+0 -11 Td
+(- state_id : BIGINT [PK]) Tj
+0 -11 Td
+(- state_src_id : VARCHAR\(100\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- state_name : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_cities) Tj
+0 -11 Td
+(- city_id : BIGINT [PK]) Tj
+0 -11 Td
+(- city_src_id : VARCHAR\(150\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- city_name : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- state_id : BIGINT [NOT NULL, FK -> nf.nf_states.state_id]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_addresses) Tj
+0 -11 Td
+(- address_id : BIGINT [PK]) Tj
+0 -11 Td
+(- address_src_id : VARCHAR\(200\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- zip_code : VARCHAR\(30\)) Tj
+0 -11 Td
+(- city_id : BIGINT [NOT NULL, FK -> nf.nf_cities.city_id]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_product_categories) Tj
+0 -11 Td
+(- product_category_id : BIGINT [PK]) Tj
+0 -11 Td
+(- product_category_src_id : VARCHAR\(100\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- product_category_name : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_promotion_types) Tj
+0 -11 Td
+(- promotion_type_id : BIGINT [PK]) Tj
+0 -11 Td
+(- promotion_type_src_id : VARCHAR\(255\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- promotion_type_name : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_shipping_partners) Tj
+0 -11 Td
+(- shipping_partner_id : BIGINT [PK]) Tj
+0 -11 Td
+(- shipping_partner_src_id : VARCHAR\(100\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- shipping_partner_name : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 3672 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 36 806 Tm
+(DWH Schema for Data Quality - Page 4) Tj
+0 -16 Td
+() Tj
+0 -11 Td
+(### nf.nf_customers) Tj
+0 -11 Td
+(- customer_id : BIGINT [PK]) Tj
+0 -11 Td
+(- customer_src_id : VARCHAR\(255\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- customer_id_nk : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- gender : VARCHAR\(20\) [NOT NULL]) Tj
+0 -11 Td
+(- marital_status : VARCHAR\(20\) [NOT NULL]) Tj
+0 -11 Td
+(- birth_of_dt : DATE) Tj
+0 -11 Td
+(- membership_dt : DATE) Tj
+0 -11 Td
+(- last_purchase_dt : TIMESTAMP) Tj
+0 -11 Td
+(- address_id : BIGINT [NOT NULL, FK -> nf.nf_addresses.address_id]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_stores) Tj
+0 -11 Td
+(- store_id : BIGINT [PK]) Tj
+0 -11 Td
+(- store_src_id : VARCHAR\(255\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- store_name : VARCHAR\(100\)) Tj
+0 -11 Td
+(- store_location_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- address_id : BIGINT [NOT NULL, FK -> nf.nf_addresses.address_id]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_products) Tj
+0 -11 Td
+(- product_id : BIGINT [PK]) Tj
+0 -11 Td
+(- product_src_id : VARCHAR\(255\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- product_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- product_category_id : BIGINT [NOT NULL, FK -> nf.nf_product_categories.product_category_id]) Tj
+0 -11 Td
+(- product_name : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- product_brand : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- product_stock : INTEGER) Tj
+0 -11 Td
+(- product_material : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- product_manufacture_dt : TIMESTAMP) Tj
+0 -11 Td
+(- product_expiry_dt : TIMESTAMP) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_promotions) Tj
+0 -11 Td
+(- promotion_id : BIGINT [PK]) Tj
+0 -11 Td
+(- promotion_src_id : VARCHAR\(255\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- promotion_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- promotion_type_id : BIGINT [NOT NULL, FK -> nf.nf_promotion_types.promotion_type_id]) Tj
+0 -11 Td
+(- promotion_channel : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- promotion_start_dt : TIMESTAMP) Tj
+0 -11 Td
+(- promotion_end_dt : TIMESTAMP) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_deliveries) Tj
+0 -11 Td
+(- delivery_id : BIGINT [PK]) Tj
+0 -11 Td
+(- delivery_src_id : VARCHAR\(255\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- delivery_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- shipping_partner_id : BIGINT [NOT NULL, FK -> nf.nf_shipping_partners.shipping_partner_id]) Tj
+0 -11 Td
+(- delivery_type : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- delivery_status : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_engagements) Tj
+0 -11 Td
+(- engagement_id : BIGINT [PK]) Tj
+0 -11 Td
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 3968 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 36 806 Tm
+(DWH Schema for Data Quality - Page 5) Tj
+0 -16 Td
+(- engagement_src_id : VARCHAR\(100\) [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- engagement_id_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- customer_support_calls : INTEGER) Tj
+0 -11 Td
+(- website_address : VARCHAR\(250\) [NOT NULL]) Tj
+0 -11 Td
+(- order_channel : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- customer_support_method : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- issue_status : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- app_usage : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- website_visits : INTEGER) Tj
+0 -11 Td
+(- social_media_engagement : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_employees_scd) Tj
+0 -11 Td
+(- employee_id : BIGINT [PK PART]) Tj
+0 -11 Td
+(- employee_src_id : VARCHAR\(255\) [NOT NULL]) Tj
+0 -11 Td
+(- employee_name_nk : VARCHAR\(100\)) Tj
+0 -11 Td
+(- employee_position : VARCHAR\(100\)) Tj
+0 -11 Td
+(- employee_salary : NUMERIC\(10,2\)) Tj
+0 -11 Td
+(- employee_hire_date : DATE) Tj
+0 -11 Td
+(- start_dt : TIMESTAMP [NOT NULL, PK PART]) Tj
+0 -11 Td
+(- end_dt : TIMESTAMP [NOT NULL]) Tj
+0 -11 Td
+(- is_active : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\)) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\)) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### nf.nf_transactions) Tj
+0 -11 Td
+(- transaction_id : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- transaction_dt : TIMESTAMP [NOT NULL]) Tj
+0 -11 Td
+(- total_sales : NUMERIC\(10,2\) [NOT NULL, DEFAULT 0]) Tj
+0 -11 Td
+(- payment_method : VARCHAR\(100\) [NOT NULL, DEFAULT 'n.a.']) Tj
+0 -11 Td
+(- quantity : INTEGER [NOT NULL, DEFAULT 0]) Tj
+0 -11 Td
+(- unit_price : NUMERIC\(10,2\) [NOT NULL, DEFAULT 0]) Tj
+0 -11 Td
+(- discount_applied : NUMERIC\(10,2\) [NOT NULL, DEFAULT 0]) Tj
+0 -11 Td
+(- day_of_week : VARCHAR\(20\) [NOT NULL, DEFAULT 'n.a.']) Tj
+0 -11 Td
+(- week_of_year : INTEGER [NOT NULL, DEFAULT -1]) Tj
+0 -11 Td
+(- month_of_year : INTEGER [NOT NULL, DEFAULT -1]) Tj
+0 -11 Td
+(- store_id : BIGINT [NOT NULL, DEFAULT -1, FK -> nf.nf_stores.store_id]) Tj
+0 -11 Td
+(- customer_id : BIGINT [NOT NULL, DEFAULT -1, FK -> nf.nf_customers.customer_id]) Tj
+0 -11 Td
+(- promotion_id : BIGINT [NOT NULL, DEFAULT -1, FK -> nf.nf_promotions.promotion_id]) Tj
+0 -11 Td
+(- delivery_id : BIGINT [NOT NULL, DEFAULT -1, FK -> nf.nf_deliveries.delivery_id]) Tj
+0 -11 Td
+(- product_id : BIGINT [NOT NULL, DEFAULT -1, FK -> nf.nf_products.product_id]) Tj
+0 -11 Td
+(- engagement_id : BIGINT [NOT NULL, DEFAULT -1, FK -> nf.nf_engagements.engagement_id]) Tj
+0 -11 Td
+(- city_id : BIGINT [NOT NULL, DEFAULT -1, FK -> nf.nf_cities.city_id]) Tj
+0 -11 Td
+(- employee_id : BIGINT [NOT NULL, DEFAULT -1]) Tj
+0 -11 Td
+(- row_sig : TEXT [NOT NULL, UNIQUE INDEX ux_nf_transactions_row_sig]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(## DIM) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.dim_customers) Tj
+0 -11 Td
+(- customer_surr_id : BIGINT [PK]) Tj
+0 -11 Td
+(- customer_src_id : BIGINT [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- gender : VARCHAR\(20\) [NOT NULL]) Tj
+0 -11 Td
+(- marital_status : VARCHAR\(20\) [NOT NULL]) Tj
+0 -11 Td
+(- birth_of_dt : DATE) Tj
+0 -11 Td
+(- membership_dt : DATE) Tj
+0 -11 Td
+(- last_purchase_dt : TIMESTAMP) Tj
+0 -11 Td
+(- customer_zip_code : VARCHAR\(30\) [NOT NULL]) Tj
+0 -11 Td
+(- customer_city : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- customer_state : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 3735 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 36 806 Tm
+(DWH Schema for Data Quality - Page 6) Tj
+0 -16 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.dim_stores) Tj
+0 -11 Td
+(- store_surr_id : BIGINT [PK]) Tj
+0 -11 Td
+(- store_src_id : BIGINT [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- store_name : VARCHAR\(100\)) Tj
+0 -11 Td
+(- store_zip_code : VARCHAR\(30\) [NOT NULL]) Tj
+0 -11 Td
+(- store_city : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- store_state : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- store_location : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.dim_products) Tj
+0 -11 Td
+(- product_surr_id : BIGINT [PK]) Tj
+0 -11 Td
+(- product_src_id : BIGINT [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- product_category : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- product_name : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- product_brand : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- product_stock : INTEGER) Tj
+0 -11 Td
+(- product_material : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- product_manufacture_dt : TIMESTAMP) Tj
+0 -11 Td
+(- product_expiry_dt : TIMESTAMP) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.dim_promotions) Tj
+0 -11 Td
+(- promotion_surr_id : BIGINT [PK]) Tj
+0 -11 Td
+(- promotion_src_id : BIGINT [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- promotion_channel : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- promotion_type : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- promotion_start_dt : TIMESTAMP) Tj
+0 -11 Td
+(- promotion_end_dt : TIMESTAMP) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.dim_deliveries) Tj
+0 -11 Td
+(- delivery_surr_id : BIGINT [PK]) Tj
+0 -11 Td
+(- delivery_src_id : BIGINT [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- delivery_type : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- delivery_status : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- shipping_partner : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.dim_engagements) Tj
+0 -11 Td
+(- engagement_surr_id : BIGINT [PK]) Tj
+0 -11 Td
+(- engagement_src_id : BIGINT [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- customer_support_calls : INTEGER) Tj
+0 -11 Td
+(- website_address : VARCHAR\(250\) [NOT NULL]) Tj
+0 -11 Td
+(- order_channel : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- customer_support_method : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- issue_status : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- app_usage : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- website_visits : INTEGER) Tj
+0 -11 Td
+(- social_media_engagement : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Length 3642 >>
+stream
+BT
+/F1 9 Tf
+1 0 0 1 36 806 Tm
+(DWH Schema for Data Quality - Page 7) Tj
+0 -16 Td
+(- update_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.dim_employees_scd) Tj
+0 -11 Td
+(- employee_surr_id : BIGINT [PK]) Tj
+0 -11 Td
+(- employee_src_id : VARCHAR\(255\) [NOT NULL]) Tj
+0 -11 Td
+(- employee_name : VARCHAR\(100\)) Tj
+0 -11 Td
+(- employee_position : VARCHAR\(100\)) Tj
+0 -11 Td
+(- employee_salary : NUMERIC\(10,2\)) Tj
+0 -11 Td
+(- employee_hire_date : DATE) Tj
+0 -11 Td
+(- start_dt : TIMESTAMP [NOT NULL]) Tj
+0 -11 Td
+(- end_dt : TIMESTAMP [NOT NULL]) Tj
+0 -11 Td
+(- is_active : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.dim_dates) Tj
+0 -11 Td
+(- date_surr_id : BIGINT [PK]) Tj
+0 -11 Td
+(- full_date : DATE [NOT NULL, UNIQUE]) Tj
+0 -11 Td
+(- day_of_month : INTEGER [NOT NULL]) Tj
+0 -11 Td
+(- month_of_year : INTEGER [NOT NULL]) Tj
+0 -11 Td
+(- year_of_date : INTEGER [NOT NULL]) Tj
+0 -11 Td
+(- quarter_of_year : INTEGER [NOT NULL]) Tj
+0 -11 Td
+(- week_of_year : INTEGER [NOT NULL]) Tj
+0 -11 Td
+(- day_name : VARCHAR\(20\) [NOT NULL]) Tj
+0 -11 Td
+(- month_name : VARCHAR\(20\) [NOT NULL]) Tj
+0 -11 Td
+(- is_weekend : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- is_month_start : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- is_month_end : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- is_quarter_start : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- is_quarter_end : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- is_year_start : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- is_year_end : BOOLEAN [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+() Tj
+0 -11 Td
+(### dim.fct_transactions_dd_dd) Tj
+0 -11 Td
+(- transaction_src_id : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- total_sales : NUMERIC\(10,2\) [NOT NULL, DEFAULT 0]) Tj
+0 -11 Td
+(- quantity : INTEGER [NOT NULL, DEFAULT 0]) Tj
+0 -11 Td
+(- unit_price : NUMERIC\(10,2\) [NOT NULL, DEFAULT 0]) Tj
+0 -11 Td
+(- discount_applied : NUMERIC\(10,2\) [NOT NULL, DEFAULT 0]) Tj
+0 -11 Td
+(- payment_method : VARCHAR\(100\) [NOT NULL, DEFAULT 'n.a.']) Tj
+0 -11 Td
+(- product_surr_id : BIGINT [NOT NULL, DEFAULT -1, FK -> dim.dim_products.product_surr_id]) Tj
+0 -11 Td
+(- promotion_surr_id : BIGINT [NOT NULL, DEFAULT -1, FK -> dim.dim_promotions.promotion_surr_id]) Tj
+0 -11 Td
+(- delivery_surr_id : BIGINT [NOT NULL, DEFAULT -1, FK -> dim.dim_deliveries.delivery_surr_id]) Tj
+0 -11 Td
+(- engagement_surr_id : BIGINT [NOT NULL, DEFAULT -1, FK -> dim.dim_engagements.engagement_surr_id]) Tj
+0 -11 Td
+(- store_surr_id : BIGINT [NOT NULL, DEFAULT -1, FK -> dim.dim_stores.store_surr_id]) Tj
+0 -11 Td
+(- customer_surr_id : BIGINT [NOT NULL, DEFAULT -1, FK -> dim.dim_customers.customer_surr_id]) Tj
+0 -11 Td
+(- employee_surr_id : BIGINT [NOT NULL, DEFAULT -1, FK -> dim.dim_employees_scd.employee_surr_id]) Tj
+0 -11 Td
+(- transaction_date_sk : BIGINT [NOT NULL, FK -> dim.dim_dates.date_surr_id]) Tj
+0 -11 Td
+(- transaction_date : DATE [NOT NULL]) Tj
+0 -11 Td
+(- source_system : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- source_table : VARCHAR\(100\) [NOT NULL]) Tj
+0 -11 Td
+(- insert_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- update_dt : TIMESTAMP [NOT NULL, DEFAULT CURRENT_TIMESTAMP]) Tj
+0 -11 Td
+(- PK : \(transaction_date, transaction_src_id, product_surr_id, promotion_surr_id, delivery_surr_id, engagement_surr_id, store_surr_id, customer_surr_id, employee_surr_id\)) Tj
+0 -11 Td
+ET
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 16 0 R >>
+endobj
+xref
+0 18
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000155 00000 n 
+0000000223 00000 n 
+0000003115 00000 n 
+0000003241 00000 n 
+0000006510 00000 n 
+0000006636 00000 n 
+0000010181 00000 n 
+0000010307 00000 n 
+0000014032 00000 n 
+0000014160 00000 n 
+0000018181 00000 n 
+0000018309 00000 n 
+0000022097 00000 n 
+0000022225 00000 n 
+0000025920 00000 n 
+trailer
+<< /Size 18 /Root 1 0 R >>
+startxref
+26048
+%%EOF
