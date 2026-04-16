@@ -1,6 +1,8 @@
-
-
-
+/*Note: Since this dataset is synthetic, some semantic inconsistencies may appear during 
+profiling. For example, the same transaction may seem to involve multiple employees, or 
+a store may appear to have operational activity despite inconsistent employee-store 
+relationships. These cases should be interpreted as dataset artifacts rather than 
+real-world business behavior.*/
 
 -- ============================================
 -- PRODUCTS (from BOTH sources)
