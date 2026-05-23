@@ -43,9 +43,9 @@ jobs:
         continue-on-error: true
         run: sqlfluff lint sql --dialect postgres
 
-
   postgres-schema-smoke:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:14
