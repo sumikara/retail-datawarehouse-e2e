@@ -1,0 +1,186 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Repository smoke validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest sqlfluff
+
+      - name: Validate key repository paths
+        run: |
+          test -d sql/00_setup
+          test -d sql/01_landing
+          test -d sql/02_mapping
+          test -d sql/03_normalized
+          test -d sql/04_dimensions
+          test -d sql/05_orchestrastion
+          test -d sql/07_data_quality
+          test -f sql/00_setup/01_extensions_schemas.sql
+          test -f sql/00_setup/02_orchestration_metadata.sql
+          test -f sql/00_setup/03_etl_log.sql
+
+      - name: Run smoke tests
+        run: pytest -q
+
+      - name: SQL lint (non-blocking for current PL/pgSQL-heavy codebase)
+        # SQLFluff is intentionally non-blocking at this stage so CI still passes
+        # while style rules are tuned for PL/pgSQL-heavy procedural SQL.
+        continue-on-error: true
+        run: sqlfluff lint sql --dialect postgres
+
+      - name: CI summary
+        run: |
+          echo "Repository smoke validation complete."
+          echo "Validated: Python setup, dependency install, key repo paths, pytest smoke tests, and non-blocking SQLFluff lint."
+
+  postgres-schema-smoke:
+    name: PostgreSQL schema smoke validation
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: retail_dwh_ci
+        options: >-
+          --health-cmd "pg_isready -U postgres -d retail_dwh_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGDATABASE: retail_dwh_ci
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..30}; do
+            pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" && exit 0
+            sleep 2
+          done
+          echo "PostgreSQL did not become ready in time" >&2
+          exit 1
+
+      - name: Execute setup/schema smoke SQL (safe subset only)
+        # Scope guardrail: schema/setup-only execution. No landing ingestion,
+        # file_fdw CSV loads, orchestration master calls, or full pipeline steps.
+        run: |
+          psql -v ON_ERROR_STOP=1 -f sql/00_setup/01_extensions_schemas.sql
+          psql -v ON_ERROR_STOP=1 -f sql/00_setup/02_orchestration_metadata.sql
+          psql -v ON_ERROR_STOP=1 -f sql/00_setup/03_etl_log.sql
+
+      - name: Validate expected schemas and orchestration objects (assertive)
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          DECLARE
+              missing_schemas text;
+              missing_tables text;
+              missing_views text;
+              has_log_fn integer;
+          BEGIN
+              SELECT string_agg(expected_schema, ', ')
+              INTO missing_schemas
+              FROM (
+                  SELECT unnest(ARRAY['sl_online_retail','sl_offline_retail','stg','nf','dim']) AS expected_schema
+              ) e
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM information_schema.schemata s
+                  WHERE s.schema_name = e.expected_schema
+              );
+
+              IF missing_schemas IS NOT NULL THEN
+                  RAISE EXCEPTION 'Missing expected schemas: %', missing_schemas;
+              END IF;
+
+              SELECT string_agg(expected_table, ', ')
+              INTO missing_tables
+              FROM (
+                  SELECT unnest(ARRAY['etl_batch_run','etl_file_registry','etl_step_run','etl_log']) AS expected_table
+              ) e
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM information_schema.tables t
+                  WHERE t.table_schema = 'stg'
+                    AND t.table_name = e.expected_table
+              );
+
+              IF missing_tables IS NOT NULL THEN
+                  RAISE EXCEPTION 'Missing expected stg tables: %', missing_tables;
+              END IF;
+
+              SELECT COUNT(*)
+              INTO has_log_fn
+              FROM information_schema.routines r
+              WHERE r.routine_schema = 'stg'
+                AND r.routine_name = 'log_etl_event';
+
+              IF has_log_fn = 0 THEN
+                  RAISE EXCEPTION 'Missing expected function: stg.log_etl_event';
+              END IF;
+
+              SELECT string_agg(expected_view, ', ')
+              INTO missing_views
+              FROM (
+                  SELECT unnest(ARRAY['v_last_etl_runs']) AS expected_view
+              ) e
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM information_schema.views v
+                  WHERE v.table_schema = 'stg'
+                    AND v.table_name = e.expected_view
+              );
+
+              IF missing_views IS NOT NULL THEN
+                  RAISE EXCEPTION 'Missing expected stg views: %', missing_views;
+              END IF;
+
+              RAISE NOTICE 'Schema smoke assertions passed.';
+          END $$;
+          SQL
+
+      - name: PostgreSQL smoke summary
+        run: |
+          echo "PostgreSQL schema smoke validation complete."
+          echo "Executed SQL files:"
+          echo "- sql/00_setup/01_extensions_schemas.sql"
+          echo "- sql/00_setup/02_orchestration_metadata.sql"
+          echo "- sql/00_setup/03_etl_log.sql"
+          echo "Intentionally excluded: landing ingestion, file_fdw CSV loads, mapping/NF/dim procedures, master/full pipeline calls, and DQ execution."
