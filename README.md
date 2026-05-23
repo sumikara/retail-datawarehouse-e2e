@@ -21,7 +21,7 @@ Current automated validation includes:
 - critical SQL and data quality asset checks
 - non-blocking SQL linting via SQLFluff
 
-Full PostgreSQL execution is planned for a later stage using a temporary PostgreSQL service and small fixture datasets. This avoids false production-deployment claims while still demonstrating engineering discipline.
+The workflow now also includes a PostgreSQL schema smoke job for setup/schema-only validation on a temporary PostgreSQL 14 service. Full PostgreSQL data pipeline execution is still planned for a later stage using small fixture datasets. This avoids false production-deployment claims while still demonstrating engineering discipline.
 
 ---
 

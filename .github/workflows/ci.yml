@@ -42,3 +42,56 @@ jobs:
         # Linting strictness will be hardened in a later CI maturity stage.
         continue-on-error: true
         run: sqlfluff lint sql --dialect postgres
+
+
+  postgres-schema-smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: retail_dwh_ci
+        options: >-
+          --health-cmd "pg_isready -U postgres -d retail_dwh_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: retail_dwh_ci
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..30}; do
+            pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" && exit 0
+            sleep 2
+          done
+          echo "PostgreSQL did not become ready in time" >&2
+          exit 1
+
+      - name: Execute setup/schema smoke SQL (safe subset only)
+        run: |
+          psql -v ON_ERROR_STOP=1 -f sql/00_setup/01_extensions_schemas.sql
+          psql -v ON_ERROR_STOP=1 -f sql/00_setup/02_orchestration_metadata.sql
+          psql -v ON_ERROR_STOP=1 -f sql/00_setup/03_etl_log.sql
+
+      - name: Validate expected schemas and orchestration objects
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name IN ('sl_online_retail','sl_offline_retail','stg','nf','dim') ORDER BY schema_name;"
+          psql -v ON_ERROR_STOP=1 -c "SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema='stg' AND table_name IN ('etl_batch_run','etl_file_registry','etl_step_run','etl_log') ORDER BY table_name;"
+          psql -v ON_ERROR_STOP=1 -c "SELECT routine_schema, routine_name FROM information_schema.routines WHERE routine_schema='stg' AND routine_name='log_etl_event';"

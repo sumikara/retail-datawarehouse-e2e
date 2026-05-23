@@ -16,6 +16,7 @@ The `CI` workflow (`.github/workflows/ci.yml`) currently validates:
 - Existence checks for critical setup SQL files
 - Smoke tests via `pytest -q`
 - SQL lint execution via SQLFluff (currently non-blocking)
+- PostgreSQL 14 service-based schema/setup smoke execution for safe setup files only
 
 ## Why full CD/deployment is intentionally not claimed yet
 
@@ -42,8 +43,10 @@ To keep CI reliable and reviewer-friendly, this stage validates structure and qu
 2. **Stage 2: SQL linting hardening**  
    Introduce stricter SQLFluff configuration for PL/pgSQL patterns and progressively enforce failures.
 
-3. **Stage 3: temporary PostgreSQL service with schema-only execution**  
-   Run setup/DDL-focused scripts against an ephemeral PostgreSQL service in CI.
+3. **Stage 3: temporary PostgreSQL service with schema-only execution (partially implemented)**  
+   ✅ Implemented now: setup/schema-only smoke execution for `sql/00_setup/01_extensions_schemas.sql`, `sql/00_setup/02_orchestration_metadata.sql`, and `sql/00_setup/03_etl_log.sql` against an ephemeral PostgreSQL 14 service.
+
+   🚫 Still intentionally excluded: landing/file_fdw CSV ingestion, master load procedure calls, and data quality suite execution.
 
 4. **Stage 4: mini fixture CSVs and data quality test execution**  
    Add tiny deterministic fixture datasets and execute DQ SQL suites in CI.
@@ -53,3 +56,8 @@ To keep CI reliable and reviewer-friendly, this stage validates structure and qu
 
 6. **Stage 6: optional deployment to Airflow/dbt/cloud environment**  
    Add optional environment-targeted delivery automation only when infrastructure and governance are ready.
+
+
+## Stage 3 implementation note
+
+The current PostgreSQL smoke job is intentionally limited to safe setup/schema checks. It does **not** run full ELT ingestion, external CSV loading, orchestration master calls, or DQ assertion suites. This keeps CI stable on GitHub-hosted runners while validating core database object creation behavior.
