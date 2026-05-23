@@ -43,9 +43,9 @@ jobs:
         continue-on-error: true
         run: sqlfluff lint sql --dialect postgres
 
-
   postgres-schema-smoke:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:14
@@ -95,3 +95,4 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name IN ('sl_online_retail','sl_offline_retail','stg','nf','dim') ORDER BY schema_name;"
           psql -v ON_ERROR_STOP=1 -c "SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema='stg' AND table_name IN ('etl_batch_run','etl_file_registry','etl_step_run','etl_log') ORDER BY table_name;"
           psql -v ON_ERROR_STOP=1 -c "SELECT routine_schema, routine_name FROM information_schema.routines WHERE routine_schema='stg' AND routine_name='log_etl_event';"
+          psql -v ON_ERROR_STOP=1 -c "SELECT table_schema, table_name FROM information_schema.views WHERE table_schema='stg' AND table_name='v_last_etl_runs';"
