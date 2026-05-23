@@ -1,4 +1,6 @@
 # Retail Data Warehouse Pipeline
+![CI](https://github.com/sumikara/e2e-retail-dwh-modeling/actions/workflows/ci.yml/badge.svg)
+
 ### A SQL-Native, End-to-End ELT Data Warehouse — Built on PostgreSQL in Google Colab
 
 This repo documents the core engineering principles that guide the design, development, and evolution of a production-oriented, SQL-heavy(PostgreSQL + PL/pgSQL) ELT (Extract → Load → Transform) Retail Data Warehouse implementation . These principles ensure that the warehouse remains reliable, scalable, maintainable, and production-ready.
@@ -6,6 +8,20 @@ This repo documents the core engineering principles that guide the design, devel
 > **Status:** Active development · Bulk load complete · Incremental load tested · Data quality layer in progress  
 > **Stack:** PostgreSQL 14 · PL/pgSQL · Google Colab · file_fdw · Python (setup only)  
 > **Architecture:** Hybrid Inmon-Kimball (Corporate Information Factory model)
+
+---
+
+## CI/CD and Automated Validation
+
+GitHub Actions validates this project on pushes and pull requests to `main`.
+
+Current automated validation includes:
+- `pytest` smoke tests
+- repository structure checks
+- critical SQL and data quality asset checks
+- non-blocking SQL linting via SQLFluff
+
+The workflow now also includes a PostgreSQL schema smoke job for setup/schema-only validation on a temporary PostgreSQL 14 service. Full PostgreSQL data pipeline execution is still planned for a later stage using small fixture datasets. This avoids false production-deployment claims while still demonstrating engineering discipline.
 
 ---
 
